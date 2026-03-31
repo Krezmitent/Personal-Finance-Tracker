@@ -1,6 +1,7 @@
 const express = require("express");
 const prisma = require("../lib/prisma");
 const auth = require("../middleware/auth");
+const { userActionLimiter } = require("../middleware/rateLimit");
 
 const router = express.Router();
 
@@ -8,7 +9,7 @@ function getMockCurrentPrice(investment) {
   return Number((investment.buyPrice * 1.08).toFixed(2));
 }
 
-router.post("/", auth, async (req, res) => {
+router.post("/", userActionLimiter, auth, async (req, res) => {
   const { assetName, type, quantity, buyPrice } = req.body;
   if (!assetName || !type || quantity === undefined || buyPrice === undefined) {
     return res.status(400).json({ error: "assetName, type, quantity and buyPrice are required" });
@@ -31,7 +32,7 @@ router.post("/", auth, async (req, res) => {
   res.status(201).json(created);
 });
 
-router.get("/", auth, async (req, res) => {
+router.get("/", userActionLimiter, auth, async (req, res) => {
   const portfolio = await prisma.investment.findMany({
     where: { userId: req.user.userId },
     orderBy: { createdAt: "desc" },

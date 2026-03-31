@@ -1,10 +1,11 @@
 const express = require("express");
 const prisma = require("../lib/prisma");
 const auth = require("../middleware/auth");
+const { userActionLimiter } = require("../middleware/rateLimit");
 
 const router = express.Router();
 
-router.post("/", auth, async (req, res) => {
+router.post("/", userActionLimiter, auth, async (req, res) => {
   const { category, monthlyLimit } = req.body;
   if (!category || monthlyLimit === undefined) {
     return res.status(400).json({ error: "category and monthlyLimit are required" });
@@ -28,7 +29,7 @@ router.post("/", auth, async (req, res) => {
   res.status(201).json(budget);
 });
 
-router.get("/", auth, async (req, res) => {
+router.get("/", userActionLimiter, auth, async (req, res) => {
   const budgets = await prisma.budget.findMany({ where: { userId: req.user.userId } });
 
   const now = new Date();

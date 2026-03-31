@@ -1,6 +1,7 @@
 const express = require("express");
 const prisma = require("../lib/prisma");
 const auth = require("../middleware/auth");
+const { userActionLimiter } = require("../middleware/rateLimit");
 
 const router = express.Router();
 
@@ -32,7 +33,7 @@ function detectRecurring(transactions) {
   return recurring;
 }
 
-router.get("/", auth, async (req, res) => {
+router.get("/", userActionLimiter, auth, async (req, res) => {
   const transactions = await prisma.transaction.findMany({
     where: { userId: req.user.userId },
     orderBy: { date: "asc" },

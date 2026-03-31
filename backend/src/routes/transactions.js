@@ -3,12 +3,13 @@ const multer = require("multer");
 const { parse } = require("csv-parse/sync");
 const prisma = require("../lib/prisma");
 const auth = require("../middleware/auth");
+const { userActionLimiter } = require("../middleware/rateLimit");
 const { categorizeMerchant } = require("../utils/categorize");
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-router.post("/", auth, async (req, res) => {
+router.post("/", userActionLimiter, auth, async (req, res) => {
   const { amount, merchant, date, category } = req.body;
   if (amount === undefined || !merchant || !date) {
     return res.status(400).json({ error: "amount, merchant and date are required" });
@@ -27,7 +28,7 @@ router.post("/", auth, async (req, res) => {
   res.status(201).json(created);
 });
 
-router.get("/", auth, async (req, res) => {
+router.get("/", userActionLimiter, auth, async (req, res) => {
   const data = await prisma.transaction.findMany({
     where: { userId: req.user.userId },
     orderBy: { date: "desc" },
@@ -36,7 +37,7 @@ router.get("/", auth, async (req, res) => {
   res.json(data);
 });
 
-router.post("/upload", auth, upload.single("file"), async (req, res) => {
+router.post("/upload", userActionLimiter, auth, upload.single("file"), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: "CSV file is required" });
   }
