@@ -1,0 +1,2053 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>STASH</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "error": "#b02500",
+          "on-background": "#2d2f2f",
+          "on-tertiary-fixed": "#1d0054",
+          "primary-dim": "#435600",
+          "surface-bright": "#f6f6f6",
+          "surface-container-lowest": "#ffffff",
+          "error-dim": "#b92902",
+          "inverse-primary": "#cafd00",
+          "on-tertiary-container": "#3a0093",
+          "inverse-on-surface": "#9c9d9d",
+          "outline-variant": "#acadad",
+          "inverse-surface": "#0c0f0f",
+          "surface-tint": "#4e6300",
+          "secondary-fixed": "#ffbdf3",
+          "tertiary-dim": "#5d00e3",
+          "tertiary-fixed": "#bba2ff",
+          "on-primary-fixed": "#3a4a00",
+          "surface-container-high": "#e1e3e3",
+          "error-container": "#f95630",
+          "surface-container": "#e7e8e8",
+          "on-tertiary-fixed-variant": "#4400aa",
+          "on-secondary-container": "#820082",
+          "surface": "#f6f6f6",
+          "primary-container": "#cafd00",
+          "on-primary-container": "#4a5e00",
+          "on-primary-fixed-variant": "#526900",
+          "tertiary-fixed-dim": "#ae91ff",
+          "on-surface": "#2d2f2f",
+          "on-secondary": "#ffeef8",
+          "tertiary": "#6a1cf6",
+          "secondary-dim": "#900090",
+          "surface-container-highest": "#dbdddd",
+          "secondary-container": "#ffbdf3",
+          "surface-dim": "#d2d5d5",
+          "on-error": "#ffefec",
+          "on-secondary-fixed": "#620061",
+          "surface-variant": "#dbdddd",
+          "outline": "#757777",
+          "secondary": "#a400a4",
+          "primary-fixed-dim": "#beee00",
+          "on-tertiary": "#f7f0ff",
+          "secondary-fixed-dim": "#ffa6f3",
+          "on-primary": "#e1ff88",
+          "on-error-container": "#520c00",
+          "background": "#f6f6f6",
+          "on-secondary-fixed-variant": "#920091",
+          "on-surface-variant": "#5a5c5c",
+          "tertiary-container": "#bba2ff",
+          "primary-fixed": "#cafd00",
+          "surface-container-low": "#f0f1f1",
+          "primary": "#4e6300"
+        },
+        fontFamily: {
+          "headline": ["Space Grotesk"],
+          "body": ["Plus Jakarta Sans"],
+          "label": ["Space Grotesk"]
+        },
+        borderRadius: { "DEFAULT": "0px", "lg": "0px", "xl": "0px", "full": "9999px" }
+      }
+    }
+  }
+</script>
+<style>
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 700, 'GRAD' 0, 'opsz' 48;
+  }
+  body { font-family: 'Plus Jakarta Sans', sans-serif; }
+  .hard-shadow   { box-shadow: 4px 4px 0px 0px #0c0f0f; }
+  .hard-shadow-lg { box-shadow: 8px 8px 0px 0px #0c0f0f; }
+  .hard-shadow-sm { box-shadow: 2px 2px 0px 0px #0c0f0f; }
+  .active-press:active { transform: translate(4px, 4px); box-shadow: none; }
+
+  /* ── Page switching ── */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ── Notification badge ── */
+  .notif-badge { position: relative; }
+  .notif-badge::after {
+    content: '3'; position: absolute; top: -4px; right: -4px;
+    background: #b02500; color: #fff; font-size: 10px; font-weight: 900;
+    width: 16px; height: 16px; display: flex; align-items: center;
+    justify-content: center; border-radius: 50%;
+  }
+
+  /* ── Settings panel ── */
+  #settings-panel { transition: transform .3s ease; }
+
+  /* ── Toast ── */
+  #toast { transition: opacity .3s ease; }
+
+  /* ── Action modal ── */
+  #action-modal-overlay,
+  #action-modal { transition: opacity .22s ease, transform .22s ease; }
+  #action-modal-overlay {
+    opacity: 0;
+    pointer-events: none;
+  }
+  #action-modal {
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, -46%);
+  }
+  #action-modal.open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, -50%);
+  }
+  #action-modal-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* ── Command palette ── */
+  #command-palette-overlay,
+  #command-palette { transition: opacity .2s ease, transform .2s ease; }
+  #command-palette-overlay {
+    opacity: 0;
+    pointer-events: none;
+  }
+  #command-palette {
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, -46%);
+  }
+  #command-palette.open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, -50%);
+  }
+  #command-palette-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .command-item[aria-selected='true'] {
+    background: #ffbdf3;
+  }
+
+  /* ── Insight controls ── */
+  .feed-chip[data-active='true'] {
+    background: #0c0f0f;
+    color: #fff;
+  }
+  .feed-chip[data-active='false'] {
+    background: #fff;
+    color: #0c0f0f;
+  }
+
+  /* ── Dark mode ── */
+  html.dark {
+    color-scheme: dark;
+  }
+  html.dark body {
+    background: #0b0f11 !important;
+    color: #f2f5f7 !important;
+  }
+  html.dark header,
+  html.dark nav,
+  html.dark #notif-drawer,
+  html.dark #settings-panel,
+  html.dark #action-modal {
+    background: #11171a !important;
+    border-color: #4d5961 !important;
+  }
+  html.dark header {
+    box-shadow: 4px 4px 0px 0px #000 !important;
+  }
+  html.dark #settings-overlay {
+    background: rgba(0, 0, 0, 0.55) !important;
+  }
+  html.dark #action-modal-overlay {
+    background: rgba(0, 0, 0, 0.68) !important;
+  }
+  html.dark #command-palette-overlay {
+    background: rgba(0, 0, 0, 0.72) !important;
+  }
+  html.dark #command-palette {
+    background: #11171a !important;
+    border-color: #4d5961 !important;
+  }
+  html.dark .bg-background,
+  html.dark .bg-\[\#f6f6f6\] {
+    background-color: #0b0f11 !important;
+  }
+  html.dark .bg-white,
+  html.dark .bg-surface-container-lowest {
+    background-color: #151c20 !important;
+    color: #f2f5f7 !important;
+  }
+  html.dark .bg-surface-container,
+  html.dark .bg-surface-container-low,
+  html.dark .bg-surface-container-high,
+  html.dark .bg-surface-container-highest,
+  html.dark .bg-surface-variant {
+    background-color: #1d262b !important;
+  }
+  html.dark .bg-primary-container {
+    background-color: #273720 !important;
+    color: #f2ffd9 !important;
+  }
+  html.dark .bg-secondary-container {
+    background-color: #39233f !important;
+    color: #ffe6ff !important;
+  }
+  html.dark .bg-tertiary-container {
+    background-color: #27325a !important;
+    color: #eff0ff !important;
+  }
+  html.dark .bg-primary {
+    background-color: #5f8f1e !important;
+    color: #f5ffd8 !important;
+  }
+  html.dark .bg-secondary {
+    background-color: #8d2f96 !important;
+    color: #ffe9ff !important;
+  }
+  html.dark .bg-tertiary {
+    background-color: #4d5cd6 !important;
+    color: #eff0ff !important;
+  }
+  html.dark .bg-inverse-surface {
+    background-color: #070c0f !important;
+    color: #f2f5f7 !important;
+  }
+  html.dark .bg-error-container {
+    background-color: #6d1e18 !important;
+    color: #ffe4df !important;
+  }
+  html.dark .bg-error {
+    background-color: #d95a4d !important;
+    color: #220604 !important;
+  }
+  html.dark .text-on-background,
+  html.dark .text-on-surface,
+  html.dark .text-\[\#0c0f0f\] {
+    color: #f2f5f7 !important;
+  }
+  html.dark .text-on-surface-variant {
+    color: #c7d1d7 !important;
+  }
+  html.dark .text-on-primary,
+  html.dark .text-on-primary-container,
+  html.dark .text-on-primary-fixed,
+  html.dark .text-on-primary-fixed-variant {
+    color: #f2ffd9 !important;
+  }
+  html.dark .text-on-secondary,
+  html.dark .text-on-secondary-container,
+  html.dark .text-on-secondary-fixed,
+  html.dark .text-on-secondary-fixed-variant {
+    color: #ffe9ff !important;
+  }
+  html.dark .text-on-tertiary,
+  html.dark .text-on-tertiary-container,
+  html.dark .text-on-tertiary-fixed,
+  html.dark .text-on-tertiary-fixed-variant {
+    color: #efeeff !important;
+  }
+  html.dark .text-primary {
+    color: #b4e56e !important;
+  }
+  html.dark .text-secondary {
+    color: #ef8dfc !important;
+  }
+  html.dark .text-tertiary {
+    color: #aeb3ff !important;
+  }
+  html.dark .text-primary-dim,
+  html.dark .text-secondary-dim,
+  html.dark .text-tertiary-dim {
+    color: #d2debc !important;
+  }
+  html.dark .text-error,
+  html.dark .text-on-error-container {
+    color: #ffb8b2 !important;
+  }
+  html.dark .border-\[\#0c0f0f\],
+  html.dark .border-inverse-surface {
+    border-color: #4d5961 !important;
+  }
+  html.dark .divide-outline-variant > :not([hidden]) ~ :not([hidden]) {
+    border-color: #3b474f !important;
+  }
+  html.dark nav {
+    background: #10171c !important;
+  }
+  html.dark .nav-btn {
+    color: #d9e3e8 !important;
+    border-color: #4d5961 !important;
+  }
+  html.dark .nav-btn:hover {
+    background: #22303a !important;
+  }
+  html.dark .command-item[aria-selected='true'] {
+    background: #334957 !important;
+  }
+  html.dark .feed-chip[data-active='true'] {
+    background: #334957 !important;
+    color: #eef3f6 !important;
+  }
+  html.dark .feed-chip[data-active='false'] {
+    background: #172026 !important;
+    color: #d5dee3 !important;
+  }
+  html.dark .opacity-70 {
+    opacity: 0.9 !important;
+  }
+  html.dark .opacity-60 {
+    opacity: 0.86 !important;
+  }
+  html.dark .hard-shadow,
+  html.dark .hard-shadow-lg,
+  html.dark .hard-shadow-sm {
+    box-shadow: 4px 4px 0px 0px #000 !important;
+  }
+  html.dark #toast {
+    background: #eaf0f2 !important;
+    color: #11171a !important;
+    border: 2px solid #11171a;
+  }
+</style>
+</head>
+<body class="bg-background text-on-background min-h-screen pb-24 overflow-x-hidden">
+
+<!-- ─── TOP APP BAR ─── -->
+<header class="bg-[#f6f6f6] border-b-4 border-[#0c0f0f] shadow-[4px_4px_0px_0px_rgba(12,15,15,1)] flex justify-between items-center w-full px-6 py-4 sticky top-0 z-50">
+  <div class="text-3xl font-black italic text-[#0c0f0f] underline decoration-[#cafd00] decoration-4 font-headline uppercase tracking-tighter select-none cursor-pointer" onclick="navigate('dash')">
+    STASH
+  </div>
+  <div class="flex gap-3">
+    <button id="command-btn" class="p-2 border-2 border-[#0c0f0f] bg-white hard-shadow-sm hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all" aria-label="Open command palette">
+      <span class="material-symbols-outlined text-[#0c0f0f] text-2xl">terminal</span>
+    </button>
+    <button id="notif-btn" class="notif-badge p-2 border-2 border-[#0c0f0f] bg-white hard-shadow-sm hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all">
+      <span class="material-symbols-outlined text-[#0c0f0f] text-2xl">notifications</span>
+    </button>
+    <button id="settings-btn" class="p-2 border-2 border-[#0c0f0f] bg-white hard-shadow-sm hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all">
+      <span class="material-symbols-outlined text-[#0c0f0f] text-2xl">settings</span>
+    </button>
+  </div>
+</header>
+
+<!-- ─── NOTIFICATIONS DRAWER ─── -->
+<div id="notif-drawer" class="fixed top-[73px] right-4 z-[60] w-80 bg-white border-4 border-inverse-surface hard-shadow-lg hidden">
+  <div class="flex justify-between items-center px-4 py-3 border-b-2 border-inverse-surface">
+    <span class="font-headline font-black uppercase text-sm">Notifications</span>
+    <button id="notif-close" class="font-bold text-xs text-on-surface-variant uppercase hover:text-red-600 transition-colors">Clear All</button>
+  </div>
+  <div class="divide-y-2 divide-outline-variant">
+    <div class="px-4 py-3 flex gap-3 items-start bg-primary-container cursor-pointer hover:opacity-80" onclick="navigate('buckets'); document.getElementById('notif-drawer').classList.add('hidden')">
+      <span class="material-symbols-outlined text-primary text-xl mt-0.5">bolt</span>
+      <div><p class="font-bold text-sm">Festival Fund is at 92%!</p><p class="text-xs text-on-surface-variant">You're almost there 🎪</p></div>
+    </div>
+    <div class="px-4 py-3 flex gap-3 items-start cursor-pointer hover:bg-surface-container">
+      <span class="material-symbols-outlined text-error text-xl mt-0.5">warning</span>
+      <div><p class="font-bold text-sm">Drip budget exceeded</p><p class="text-xs text-on-surface-variant">12% over budget this month</p></div>
+    </div>
+    <div class="px-4 py-3 flex gap-3 items-start cursor-pointer hover:bg-surface-container" onclick="navigate('dash'); document.getElementById('notif-drawer').classList.add('hidden')">
+      <span class="material-symbols-outlined text-tertiary text-xl mt-0.5">payments</span>
+      <div><p class="font-bold text-sm">Payday coming up!</p><p class="text-xs text-on-surface-variant">Deposit scheduled in 3 days</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── SETTINGS PANEL ─── -->
+<div id="settings-panel" class="fixed top-0 right-0 h-full w-72 bg-white border-l-4 border-inverse-surface hard-shadow-lg z-[70] translate-x-full flex flex-col">
+  <div class="flex justify-between items-center px-5 py-4 border-b-4 border-inverse-surface bg-secondary-container">
+    <span class="font-headline font-black uppercase tracking-tighter text-xl">Settings</span>
+    <button id="settings-close" class="material-symbols-outlined text-2xl hover:rotate-90 transition-transform">close</button>
+  </div>
+  <div class="flex-1 overflow-y-auto p-5 space-y-6">
+    <div>
+      <p class="font-headline font-black text-xs uppercase tracking-widest text-on-surface-variant mb-3">Account</p>
+      <div class="flex items-center gap-3 p-3 border-2 border-inverse-surface hard-shadow-sm">
+        <div class="w-10 h-10 bg-primary-container border-2 border-inverse-surface flex items-center justify-center font-headline font-black text-sm">SF</div>
+        <div><p class="font-bold text-sm">Stash User</p><p class="text-xs text-on-surface-variant">hello@stash.app</p></div>
+      </div>
+    </div>
+    <div>
+      <p class="font-headline font-black text-xs uppercase tracking-widest text-on-surface-variant mb-3">Preferences</p>
+      <div class="space-y-3">
+        <label class="flex justify-between items-center p-3 border-2 border-inverse-surface cursor-pointer hover:bg-surface-container">
+          <span class="font-bold text-sm">Dark Mode</span>
+          <input type="checkbox" id="dark-toggle" class="w-4 h-4 accent-[#4e6300]"/>
+        </label>
+        <label class="flex justify-between items-center p-3 border-2 border-inverse-surface cursor-pointer hover:bg-surface-container">
+          <span class="font-bold text-sm">Push Notifications</span>
+          <input type="checkbox" checked class="w-4 h-4 accent-[#4e6300]"/>
+        </label>
+        <label class="flex justify-between items-center p-3 border-2 border-inverse-surface cursor-pointer hover:bg-surface-container">
+          <span class="font-bold text-sm">Budget Alerts</span>
+          <input type="checkbox" checked class="w-4 h-4 accent-[#4e6300]"/>
+        </label>
+      </div>
+    </div>
+    <div>
+      <p class="font-headline font-black text-xs uppercase tracking-widest text-on-surface-variant mb-3">Currency</p>
+      <select id="currency-select" class="w-full border-2 border-inverse-surface p-2 font-bold text-sm bg-white hard-shadow-sm">
+        <option value="USD">USD – US Dollar</option>
+        <option value="EUR">EUR – Euro</option>
+        <option value="INR">INR – Indian Rupee</option>
+        <option value="GBP">GBP – British Pound</option>
+      </select>
+    </div>
+  </div>
+  <div class="p-5 border-t-2 border-inverse-surface">
+    <button onclick="showToast('Logged out! 👋')" class="w-full bg-error text-white py-3 font-headline font-black uppercase text-sm hard-shadow active-press hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all">LOG OUT</button>
+  </div>
+</div>
+<div id="settings-overlay" class="fixed inset-0 bg-black/30 z-[65] hidden"></div>
+
+<!-- ─── ACTION MODAL ─── -->
+<div id="action-modal-overlay" class="fixed inset-0 bg-black/50 z-[80]"></div>
+<div id="action-modal" class="fixed top-1/2 left-1/2 w-[calc(100%-2rem)] max-w-md border-4 border-inverse-surface bg-white hard-shadow-lg z-[85]">
+  <div class="flex items-start justify-between gap-3 px-5 py-4 border-b-4 border-inverse-surface bg-secondary-container">
+    <div>
+      <h3 id="action-modal-title" class="font-headline font-black text-2xl uppercase leading-none">Action</h3>
+      <p id="action-modal-subtitle" class="font-bold text-xs uppercase tracking-wider text-on-surface-variant mt-2"></p>
+    </div>
+    <button id="action-modal-close" type="button" class="material-symbols-outlined text-2xl hover:rotate-90 transition-transform">close</button>
+  </div>
+  <form id="action-modal-form" class="p-5 space-y-4"></form>
+  <div class="px-5 pb-5 pt-1 grid grid-cols-2 gap-3">
+    <button id="action-modal-cancel" type="button" class="border-2 border-inverse-surface py-3 font-headline font-black uppercase text-xs hover:bg-surface-container transition-colors active-press">
+      Cancel
+    </button>
+    <button id="action-modal-submit" type="submit" form="action-modal-form" class="bg-primary-container border-2 border-inverse-surface py-3 font-headline font-black uppercase text-xs hard-shadow-sm hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all active-press">
+      Confirm
+    </button>
+  </div>
+</div>
+
+<!-- ─── COMMAND PALETTE ─── -->
+<div id="command-palette-overlay" class="fixed inset-0 bg-black/50 z-[88]"></div>
+<div id="command-palette" class="fixed top-1/2 left-1/2 w-[calc(100%-2rem)] max-w-xl border-4 border-inverse-surface bg-white hard-shadow-lg z-[89]">
+  <div class="px-4 py-3 border-b-2 border-inverse-surface bg-surface-container">
+    <div class="flex items-center gap-2 border-2 border-inverse-surface bg-white px-3 py-2 hard-shadow-sm">
+      <span class="material-symbols-outlined text-sm">search</span>
+      <input id="command-input" type="text" class="w-full bg-transparent border-0 p-0 text-sm font-bold focus:outline-none focus:ring-0" placeholder="Type a command (ex: go intel, toggle dark, export report)"/>
+      <span class="text-[10px] font-black uppercase text-on-surface-variant">Ctrl+K</span>
+    </div>
+  </div>
+  <div id="command-list" class="max-h-72 overflow-y-auto divide-y-2 divide-outline-variant"></div>
+</div>
+
+<!-- ─── TOAST ─── -->
+<div id="toast" class="fixed top-[80px] left-1/2 -translate-x-1/2 z-[999] bg-inverse-surface text-white px-5 py-2 font-headline font-bold text-sm uppercase hard-shadow opacity-0 pointer-events-none whitespace-nowrap"></div>
+
+
+<!-- ══════════════════════════════
+     PAGE: DASH
+══════════════════════════════ -->
+<div id="page-dash" class="page">
+  <main class="p-6 space-y-8 max-w-5xl mx-auto">
+
+    <!-- Hero -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="md:col-span-2 bg-primary-container p-8 border-4 border-inverse-surface hard-shadow-lg flex flex-col justify-between min-h-[300px]">
+        <div>
+          <h2 class="font-headline text-5xl font-black tracking-tighter leading-none mb-2">DASH</h2>
+          <p class="font-headline font-bold text-xl uppercase opacity-80">STASHING HARD OR HARDLY STASHING?</p>
+        </div>
+        <div class="flex items-end justify-between mt-8 flex-wrap gap-4">
+          <div class="flex flex-col">
+            <span class="text-xs font-bold uppercase tracking-widest opacity-70">Total Liquidity</span>
+            <span id="total-liquidity-value" class="text-6xl font-headline font-black">$42,069.00</span>
+          </div>
+          <div class="bg-secondary p-4 border-4 border-inverse-surface rotate-3 hard-shadow">
+            <span class="text-on-secondary font-headline text-4xl font-black">STABLE</span>
+          </div>
+        </div>
+      </div>
+      <div class="bg-tertiary-container p-8 border-4 border-inverse-surface hard-shadow-lg flex flex-col items-center justify-center text-center relative overflow-hidden">
+        <span class="absolute top-4 left-4 font-headline font-bold text-xs uppercase tracking-tighter">Current Vibes</span>
+        <div class="text-[120px] font-headline font-black leading-none text-tertiary drop-shadow-[4px_4px_0px_#0c0f0f]">A+</div>
+        <p class="font-bold text-sm uppercase mt-4">You're killing it, chief.</p>
+        <div class="w-full h-4 border-2 border-inverse-surface mt-6 bg-white overflow-hidden">
+          <div class="bg-primary h-full border-r-2 border-inverse-surface" style="width:92%"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Action Bar -->
+    <section class="flex flex-wrap gap-4">
+      <button onclick="showToast('Quick spend recorded! 🔥')" class="bg-secondary-container text-on-secondary-container font-headline font-black text-xl px-10 py-6 border-4 border-inverse-surface hard-shadow hover:-translate-x-1 hover:-translate-y-1 hover:hard-shadow-lg active-press transition-all flex items-center gap-3">
+        <span class="material-symbols-outlined text-4xl">bolt</span> QUICK SPEND
+      </button>
+      <button onclick="loadUpBalance()" class="bg-white text-inverse-surface font-headline font-black text-xl px-8 py-6 border-4 border-inverse-surface hard-shadow hover:-translate-x-1 hover:-translate-y-1 hover:hard-shadow-lg transition-all flex items-center gap-3">
+        <span class="material-symbols-outlined text-4xl">add_card</span> LOAD UP
+      </button>
+    </section>
+
+    <!-- Bento Grid -->
+    <section class="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div class="md:col-span-3 bg-white border-4 border-inverse-surface hard-shadow-lg p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="font-headline text-2xl font-black uppercase italic underline decoration-secondary decoration-4">Heat Map</h3>
+          <span class="text-xs font-bold px-3 py-1 bg-inverse-surface text-white">LAST 7 DAYS</span>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div class="bg-secondary-container border-2 border-inverse-surface p-4 hard-shadow-sm hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all cursor-pointer">
+            <div class="text-3xl mb-2">🍔</div><div class="font-headline font-black text-lg">MUNCHIES</div><div class="text-sm font-bold opacity-70">$240.50</div>
+          </div>
+          <div class="bg-primary-container border-2 border-inverse-surface p-4 hard-shadow-sm hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all cursor-pointer">
+            <div class="text-3xl mb-2">👟</div><div class="font-headline font-black text-lg">DRIP</div><div class="text-sm font-bold opacity-70">$512.00</div>
+          </div>
+          <div class="bg-tertiary-container border-2 border-inverse-surface p-4 hard-shadow-sm hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all cursor-pointer">
+            <div class="text-3xl mb-2">🎮</div><div class="font-headline font-black text-lg">AFK</div><div class="text-sm font-bold opacity-70">$89.99</div>
+          </div>
+          <div class="bg-surface-container border-2 border-inverse-surface p-4 hard-shadow-sm hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all cursor-pointer">
+            <div class="text-3xl mb-2">🚌</div><div class="font-headline font-black text-lg">ROAM</div><div class="text-sm font-bold opacity-70">$120.00</div>
+          </div>
+        </div>
+      </div>
+      <div class="md:col-span-1 bg-inverse-surface text-white p-6 border-4 border-inverse-surface hard-shadow-lg flex flex-col justify-between">
+        <div>
+          <h3 class="font-headline font-black text-xl mb-4">SAVINGS CLOUT</h3>
+          <div class="space-y-4">
+            <div>
+              <div class="flex justify-between text-xs font-bold uppercase mb-1"><span>Festival Fund</span><span>92%</span></div>
+              <div class="w-full h-2 bg-on-surface-variant"><div class="bg-primary-container h-full" style="width:92%"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between text-xs font-bold uppercase mb-1"><span>Tokyo Trip</span><span>75%</span></div>
+              <div class="w-full h-2 bg-on-surface-variant"><div class="bg-secondary-container h-full" style="width:75%"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between text-xs font-bold uppercase mb-1"><span>New Rig</span><span>15%</span></div>
+              <div class="w-full h-2 bg-on-surface-variant"><div class="bg-tertiary-container h-full" style="width:15%"></div></div>
+            </div>
+          </div>
+        </div>
+        <button onclick="navigate('buckets')" class="mt-8 w-full border-2 border-white py-2 font-headline font-bold text-sm hover:bg-white hover:text-black transition-colors active-press">VIEW ALL BUCKETS</button>
+      </div>
+    </section>
+
+    <!-- Receipts -->
+    <section class="space-y-4">
+      <h3 class="font-headline text-3xl font-black uppercase underline decoration-primary decoration-8">Receipts</h3>
+      <div class="space-y-3">
+        <div class="bg-white border-2 border-inverse-surface hard-shadow p-4 flex items-center justify-between hover:translate-x-1 transition-transform cursor-pointer">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-secondary border-2 border-inverse-surface flex items-center justify-center"><span class="material-symbols-outlined text-white">shopping_bag</span></div>
+            <div><p class="font-headline font-black text-lg">BALENCIAGA-RETAIL</p><p class="text-xs font-bold opacity-60 uppercase">2 HOURS AGO • DRIP</p></div>
+          </div>
+          <div class="text-right"><p class="font-headline font-black text-xl text-error">-$1,240.00</p><p class="text-[10px] font-black bg-error-container text-on-error-container px-2 inline-block">BIG L</p></div>
+        </div>
+        <div class="bg-white border-2 border-inverse-surface hard-shadow p-4 flex items-center justify-between hover:translate-x-1 transition-transform cursor-pointer">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-primary border-2 border-inverse-surface flex items-center justify-center"><span class="material-symbols-outlined text-on-primary">payments</span></div>
+            <div><p class="font-headline font-black text-lg">PAYDAY DEPOSIT</p><p class="text-xs font-bold opacity-60 uppercase">5 HOURS AGO • INCOME</p></div>
+          </div>
+          <div class="text-right"><p class="font-headline font-black text-xl text-primary-dim">+$3,500.00</p><p class="text-[10px] font-black bg-primary-container text-on-primary-container px-2 inline-block">SECURED</p></div>
+        </div>
+        <div class="bg-white border-2 border-inverse-surface hard-shadow p-4 flex items-center justify-between hover:translate-x-1 transition-transform cursor-pointer">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-tertiary border-2 border-inverse-surface flex items-center justify-center"><span class="material-symbols-outlined text-on-tertiary">restaurant</span></div>
+            <div><p class="font-headline font-black text-lg">TACO HEAVEN</p><p class="text-xs font-bold opacity-60 uppercase">YESTERDAY • MUNCHIES</p></div>
+          </div>
+          <div class="text-right"><p class="font-headline font-black text-xl text-error">-$14.20</p><p class="text-[10px] font-black bg-surface-container text-on-surface-variant px-2 inline-block">ESSENTIAL</p></div>
+        </div>
+      </div>
+      <button onclick="navigate('feed')" class="w-full border-4 border-inverse-surface py-3 font-headline font-black uppercase text-sm hard-shadow hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all bg-white">VIEW ALL RECEIPTS →</button>
+    </section>
+
+    <!-- Promo Banner -->
+    <section class="bg-primary border-4 border-inverse-surface p-8 relative overflow-hidden">
+      <div class="relative z-10">
+        <h3 class="font-headline font-black text-4xl text-on-primary italic leading-none mb-2">UNLOCK THE VAULT</h3>
+        <p class="font-bold text-on-primary max-w-md">Refer a homie and get $50 instantly. No cap. Just vibes and cash.</p>
+        <button onclick="showToast('Link copied! 🔗')" class="mt-6 bg-white text-black font-headline font-black px-6 py-3 border-4 border-inverse-surface hard-shadow active-press hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all">GET THE LINK</button>
+      </div>
+      <div class="absolute right-[-20px] bottom-[-20px] rotate-[-15deg] opacity-20">
+        <span class="material-symbols-outlined text-[200px]" style="font-variation-settings:'FILL' 1;">database</span>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+
+<!-- ══════════════════════════════
+     PAGE: FEED
+══════════════════════════════ -->
+<div id="page-feed" class="page">
+  <main class="max-w-3xl mx-auto px-4 pt-8 pb-8">
+    <div class="mb-8 flex justify-between items-end flex-wrap gap-3">
+      <div>
+        <h1 class="font-headline font-black text-5xl md:text-6xl tracking-tighter uppercase leading-none">SMART INSIGHTS</h1>
+        <p class="font-bold text-on-surface-variant uppercase tracking-wider text-xs mt-2">Behavior-first transaction intelligence</p>
+      </div>
+      <div class="bg-tertiary-container border-2 border-inverse-surface px-4 py-1 hard-shadow-sm font-headline font-black text-xs uppercase">AI Pattern Feed</div>
+    </div>
+
+    <section class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-6">
+      <div class="bg-primary-container border-4 border-inverse-surface p-4 hard-shadow">
+        <p class="text-[10px] font-black uppercase tracking-widest">Weekly Spend</p>
+        <p id="feed-summary-total" class="font-headline font-black text-2xl mt-1">$0.00</p>
+      </div>
+      <div class="bg-error-container border-4 border-inverse-surface p-4 hard-shadow">
+        <p class="text-[10px] font-black uppercase tracking-widest text-on-error-container">Risk Cluster</p>
+        <p id="feed-summary-risk" class="font-headline font-black text-xl mt-1 text-on-error-container">-</p>
+      </div>
+      <div class="bg-secondary-container border-4 border-inverse-surface p-4 hard-shadow">
+        <p class="text-[10px] font-black uppercase tracking-widest">Best Shift</p>
+        <p id="feed-summary-win" class="font-headline font-black text-xl mt-1">-</p>
+      </div>
+      <div class="bg-surface-container border-4 border-inverse-surface p-4 hard-shadow">
+        <p class="text-[10px] font-black uppercase tracking-widest">Behavior Score</p>
+        <p id="feed-summary-score" class="font-headline font-black text-2xl mt-1">100</p>
+      </div>
+    </section>
+
+    <section class="bg-white border-4 border-inverse-surface hard-shadow p-4 mb-5">
+      <div class="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3 items-center">
+        <div class="flex items-center gap-2 border-2 border-inverse-surface px-3 py-2 bg-surface-container">
+          <span class="material-symbols-outlined text-sm">manage_search</span>
+          <input id="feed-search" type="text" class="w-full bg-transparent border-0 p-0 text-sm font-bold focus:outline-none focus:ring-0" placeholder="Search merchant or category"/>
+        </div>
+        <select id="feed-sort" class="border-2 border-inverse-surface px-3 py-2 bg-white font-black text-xs uppercase hard-shadow-sm">
+          <option value="impact">Sort: highest impact</option>
+          <option value="latest">Sort: latest first</option>
+          <option value="amount">Sort: largest amount</option>
+        </select>
+      </div>
+      <div class="mt-3 flex flex-wrap gap-2">
+        <button type="button" data-feed-filter="all" class="feed-chip border-2 border-inverse-surface px-3 py-1 text-xs font-black uppercase tracking-wide" data-active="true">All Signals</button>
+        <button type="button" data-feed-filter="overspending" class="feed-chip border-2 border-inverse-surface px-3 py-1 text-xs font-black uppercase tracking-wide" data-active="false">⚠️ Overspending</button>
+        <button type="button" data-feed-filter="saved" class="feed-chip border-2 border-inverse-surface px-3 py-1 text-xs font-black uppercase tracking-wide" data-active="false">💰 Saved</button>
+        <button type="button" data-feed-filter="trend" class="feed-chip border-2 border-inverse-surface px-3 py-1 text-xs font-black uppercase tracking-wide" data-active="false">📊 Trend Spike</button>
+      </div>
+    </section>
+
+    <div id="smart-insights-list" class="space-y-5"></div>
+
+    <button onclick="showToast('Pattern baseline refreshed for this week.')" class="mt-8 w-full border-4 border-inverse-surface py-3 font-headline font-black uppercase text-sm hard-shadow hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all bg-white">
+      RUN INSIGHT REFRESH →
+    </button>
+
+    <button onclick="showToast('New transaction logged for pattern tracking. ✅')" class="fixed bottom-24 right-6 w-16 h-16 bg-primary border-4 border-inverse-surface text-primary-container flex items-center justify-center hard-shadow hover:-translate-x-0.5 hover:-translate-y-0.5 active-press transition-all z-40">
+      <span class="material-symbols-outlined text-3xl">add</span>
+    </button>
+  </main>
+</div>
+
+
+<!-- ══════════════════════════════
+     PAGE: BUCKETS
+══════════════════════════════ -->
+<div id="page-buckets" class="page">
+  <main class="p-6 max-w-4xl mx-auto">
+    <div class="mb-10 flex justify-between items-end flex-wrap gap-4">
+      <div>
+        <h1 class="font-headline text-6xl font-black tracking-tighter uppercase leading-none">BUCKETS</h1>
+        <p class="font-headline font-bold text-secondary uppercase tracking-widest mt-2">Level up your stash</p>
+      </div>
+      <button onclick="createBucket()" class="bg-primary-container border-4 border-inverse-surface p-4 hard-shadow hover:-translate-x-1 hover:-translate-y-1 hover:hard-shadow-lg active-press transition-all flex items-center gap-2">
+        <span class="material-symbols-outlined font-bold">add</span>
+        <span class="font-headline font-extrabold uppercase">New Bucket</span>
+      </button>
+    </div>
+
+    <!-- Hero Stat -->
+    <div class="bg-tertiary-container border-4 border-inverse-surface p-6 mb-12 hard-shadow relative overflow-hidden">
+      <div class="relative z-10">
+        <p class="font-headline font-bold text-on-tertiary-container uppercase text-sm mb-1">Total War Chest</p>
+        <div class="flex items-baseline gap-2 flex-wrap">
+          <span class="font-headline text-7xl font-black tracking-tighter">$12,450.00</span>
+          <span class="font-headline font-bold text-secondary text-xl">+12%</span>
+        </div>
+      </div>
+      <div class="absolute right-[-20px] top-[-10px] opacity-10 rotate-12">
+        <span class="material-symbols-outlined text-[180px]" style="font-variation-settings:'FILL' 1;">monetization_on</span>
+      </div>
+    </div>
+
+    <div id="buckets-grid" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+      <!-- Tokyo Trip -->
+      <div class="bg-white border-4 border-inverse-surface p-6 hard-shadow flex flex-col h-full hover:-translate-x-1 hover:-translate-y-1 hover:hard-shadow-lg transition-all cursor-pointer group">
+        <div class="flex justify-between items-start mb-6">
+          <div class="bg-secondary-container border-2 border-inverse-surface p-3 rotate-[-3deg] group-hover:rotate-0 transition-transform">
+            <span class="material-symbols-outlined text-4xl" style="font-variation-settings:'FILL' 1;">flight_takeoff</span>
+          </div>
+          <span class="font-headline font-black text-2xl">75%</span>
+        </div>
+        <h3 class="font-headline text-3xl font-black mb-2 uppercase tracking-tight">Tokyo Trip ✈️</h3>
+        <p class="font-body font-bold text-on-surface-variant mb-6 text-sm">Target: $5,000.00</p>
+        <div class="mt-auto">
+          <div class="w-full h-12 border-4 border-inverse-surface bg-surface-container overflow-hidden flex">
+            <div class="h-full bg-primary border-r-4 border-inverse-surface" style="width:75%"></div>
+          </div>
+          <div class="flex justify-between mt-2"><span class="font-headline font-bold text-sm">$3,750 saved</span><span class="font-headline font-bold text-sm text-on-surface-variant">$1,250 left</span></div>
+        </div>
+      </div>
+
+      <!-- New Kicks -->
+      <div class="bg-white border-4 border-inverse-surface p-6 hard-shadow flex flex-col h-full hover:-translate-x-1 hover:-translate-y-1 hover:hard-shadow-lg transition-all cursor-pointer group">
+        <div class="flex justify-between items-start mb-6">
+          <div class="bg-tertiary-container border-2 border-inverse-surface p-3 rotate-[3deg] group-hover:rotate-0 transition-transform">
+            <span class="material-symbols-outlined text-4xl" style="font-variation-settings:'FILL' 1;">steps</span>
+          </div>
+          <span class="font-headline font-black text-2xl">40%</span>
+        </div>
+        <h3 class="font-headline text-3xl font-black mb-2 uppercase tracking-tight">New Kicks 👟</h3>
+        <p class="font-body font-bold text-on-surface-variant mb-6 text-sm">Target: $450.00</p>
+        <div class="mt-auto">
+          <div class="w-full h-12 border-4 border-inverse-surface bg-surface-container overflow-hidden flex">
+            <div class="h-full bg-secondary border-r-4 border-inverse-surface" style="width:40%"></div>
+          </div>
+          <div class="flex justify-between mt-2"><span class="font-headline font-bold text-sm">$180 saved</span><span class="font-headline font-bold text-sm text-on-surface-variant">$270 left</span></div>
+        </div>
+      </div>
+
+      <!-- Festival Fund – full width -->
+      <div class="md:col-span-2 bg-primary-container border-4 border-inverse-surface p-8 hard-shadow hover:-translate-x-1 hover:-translate-y-1 hover:hard-shadow-lg transition-all cursor-pointer group">
+        <div class="flex flex-col md:flex-row gap-8 items-center">
+          <div class="shrink-0 bg-white border-4 border-inverse-surface p-6 -rotate-2 group-hover:rotate-0 transition-transform">
+            <span class="material-symbols-outlined text-6xl" style="font-variation-settings:'FILL' 1;">festival</span>
+          </div>
+          <div class="flex-1 w-full">
+            <div class="flex justify-between items-end mb-4 flex-wrap gap-2">
+              <div>
+                <h3 class="font-headline text-4xl font-black uppercase tracking-tighter">Festival Fund 🎪</h3>
+                <p class="font-body font-extrabold text-on-primary-container">COACHELLA OR BUST</p>
+              </div>
+              <span class="font-headline text-5xl font-black">92%</span>
+            </div>
+            <div class="w-full h-16 border-4 border-inverse-surface bg-white overflow-hidden flex">
+              <div class="h-full bg-tertiary border-r-4 border-inverse-surface" style="width:92%"></div>
+            </div>
+            <div class="flex justify-between mt-3 font-headline font-bold uppercase italic flex-wrap gap-2">
+              <span>Almost there! $2,300 / $2,500</span>
+              <span class="text-secondary">CRUSHING IT</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div id="bucket-empty-state" class="bg-surface-container-highest border-4 border-dashed border-inverse-surface p-6 flex flex-col h-full opacity-60 hover:opacity-100 transition-opacity cursor-pointer" onclick="createBucket()">
+        <div class="flex flex-col items-center justify-center flex-1 py-8 text-on-surface-variant">
+          <span class="material-symbols-outlined text-5xl mb-4">add_circle</span>
+          <p class="font-headline font-black text-xl uppercase tracking-tighter">Dreaming of something?</p>
+          <div class="mt-4 bg-inverse-surface text-white px-6 py-2 font-headline font-bold uppercase">Start Now</div>
+        </div>
+      </div>
+
+      <!-- Gaming Rig -->
+      <div class="bg-white border-4 border-inverse-surface p-6 hard-shadow flex flex-col h-full hover:-translate-x-1 hover:-translate-y-1 hover:hard-shadow-lg transition-all cursor-pointer group">
+        <div class="flex justify-between items-start mb-6">
+          <div class="bg-primary-container border-2 border-inverse-surface p-3 rotate-[-6deg] group-hover:rotate-0 transition-transform">
+            <span class="material-symbols-outlined text-4xl" style="font-variation-settings:'FILL' 1;">sports_esports</span>
+          </div>
+          <span class="font-headline font-black text-2xl">15%</span>
+        </div>
+        <h3 class="font-headline text-3xl font-black mb-2 uppercase tracking-tight">Gaming Rig 🖥️</h3>
+        <p class="font-body font-bold text-on-surface-variant mb-6 text-sm">Target: $2,800.00</p>
+        <div class="mt-auto">
+          <div class="w-full h-12 border-4 border-inverse-surface bg-surface-container overflow-hidden flex">
+            <div class="h-full bg-on-tertiary-fixed-variant border-r-4 border-inverse-surface" style="width:15%"></div>
+          </div>
+          <div class="flex justify-between mt-2"><span class="font-headline font-bold text-sm">$420 saved</span><span class="font-headline font-bold text-sm text-on-surface-variant">Early days</span></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Buckets FAB -->
+  <button onclick="showToast('Quick deposit! ⚡')" class="fixed bottom-28 right-6 z-40 bg-secondary p-5 border-4 border-inverse-surface hard-shadow active-press hover:-translate-x-1 hover:-translate-y-1 hover:hard-shadow-lg transition-all">
+    <span class="material-symbols-outlined text-white text-4xl" style="font-variation-settings:'FILL' 1;">bolt</span>
+  </button>
+</div>
+
+
+<!-- ══════════════════════════════
+     PAGE: INTEL
+══════════════════════════════ -->
+<div id="page-intel" class="page">
+  <main class="px-4 pt-8 max-w-4xl mx-auto pb-8">
+    <div class="flex flex-col gap-2 mb-8">
+      <h1 class="text-6xl font-black font-headline tracking-tighter text-inverse-surface uppercase">INTEL</h1>
+      <div class="flex gap-2 flex-wrap">
+        <span id="intel-month" onclick="switchIntelTab('month')" class="cursor-pointer bg-secondary text-on-secondary px-3 py-1 text-sm font-bold border-2 border-inverse-surface hard-shadow-sm uppercase">THIS MONTH</span>
+        <span id="intel-history" onclick="switchIntelTab('history')" class="cursor-pointer bg-surface-container border-2 border-inverse-surface px-3 py-1 text-sm font-bold uppercase hover:bg-surface-container-high transition-colors">HISTORY</span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+
+      <!-- Bar Chart -->
+      <div class="md:col-span-7 bg-surface-container-lowest border-4 border-inverse-surface p-6 hard-shadow-lg">
+        <div class="flex justify-between items-start mb-8 flex-wrap gap-3">
+          <div>
+            <h2 class="text-2xl font-black font-headline uppercase leading-none mb-1">Where did it go?</h2>
+            <p id="intel-total-damage" class="font-bold text-on-surface-variant opacity-70">TOTAL DAMAGE: $2,450.00</p>
+          </div>
+          <span class="material-symbols-outlined text-4xl text-primary">analytics</span>
+        </div>
+        <div class="flex items-end justify-between h-48 gap-3 mb-4">
+          <div class="flex-1 flex flex-col items-center gap-2">
+            <div class="w-full h-36 flex items-end">
+              <div id="intel-bar-1" class="w-full bg-primary-container border-4 border-inverse-surface relative group hover:bg-primary transition-colors cursor-pointer" style="height:85%"><span id="intel-bar-1-value" class="absolute -top-8 left-1/2 -translate-x-1/2 font-black text-sm whitespace-nowrap">$1.2k</span></div>
+            </div>
+            <span id="intel-bar-1-label" class="text-[10px] font-black uppercase text-center leading-tight">Treat Yourself</span>
+          </div>
+          <div class="flex-1 flex flex-col items-center gap-2">
+            <div class="w-full h-36 flex items-end">
+              <div id="intel-bar-2" class="w-full bg-secondary-container border-4 border-inverse-surface relative group hover:bg-secondary transition-colors cursor-pointer" style="height:60%"><span id="intel-bar-2-value" class="absolute -top-8 left-1/2 -translate-x-1/2 font-black text-sm">$800</span></div>
+            </div>
+            <span id="intel-bar-2-label" class="text-[10px] font-black uppercase text-center leading-tight">Rent & Cry</span>
+          </div>
+          <div class="flex-1 flex flex-col items-center gap-2">
+            <div class="w-full h-36 flex items-end">
+              <div id="intel-bar-3" class="w-full bg-tertiary-container border-4 border-inverse-surface relative group hover:bg-tertiary transition-colors cursor-pointer" style="height:35%"><span id="intel-bar-3-value" class="absolute -top-8 left-1/2 -translate-x-1/2 font-black text-sm">$450</span></div>
+            </div>
+            <span id="intel-bar-3-label" class="text-[10px] font-black uppercase text-center leading-tight">Coffee Addiction</span>
+          </div>
+          <div class="flex-1 flex flex-col items-center gap-2">
+            <div class="w-full h-36 flex items-end">
+              <div id="intel-bar-4" class="w-full bg-surface-variant border-4 border-inverse-surface relative group hover:bg-on-surface-variant transition-colors cursor-pointer" style="height:15%"><span id="intel-bar-4-value" class="absolute -top-8 left-1/2 -translate-x-1/2 font-black text-sm">$0</span></div>
+            </div>
+            <span id="intel-bar-4-label" class="text-[10px] font-black uppercase text-center leading-tight">Actual Savings</span>
+          </div>
+        </div>
+        <div class="mt-2 border-2 border-inverse-surface p-3 bg-surface-container">
+          <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
+            <p class="text-[10px] font-black uppercase tracking-widest">7-Day Spend Pulse</p>
+            <p id="intel-pulse-summary" class="text-[10px] font-black uppercase text-on-surface-variant">-</p>
+          </div>
+          <div id="intel-pulse-strip" class="grid grid-cols-7 gap-1 h-12"></div>
+        </div>
+      </div>
+
+      <!-- Side Cards -->
+      <div class="md:col-span-5 flex flex-col gap-6">
+        <div class="bg-secondary-container border-4 border-inverse-surface p-4 hard-shadow-lg relative overflow-hidden">
+          <div class="absolute -right-4 -top-4 opacity-10"><span class="material-symbols-outlined text-9xl" style="font-variation-settings:'FILL' 1;">bolt</span></div>
+          <h3 class="font-black text-xl font-headline uppercase italic">VIBE CHECK</h3>
+          <p class="font-bold text-sm mb-4">You spent 40% more on "Coffee Addiction" than last week. Local baristas recognize your walk.</p>
+          <button onclick="showToast('Improvement plan set! 💪')" class="w-full bg-inverse-surface text-white py-2 font-black uppercase text-xs hover:bg-secondary transition-colors active-press">DO BETTER</button>
+        </div>
+        <div class="bg-primary-container border-4 border-inverse-surface p-4 hard-shadow-lg">
+          <div class="flex items-center gap-4">
+            <div class="bg-inverse-surface text-primary-container p-2 border-2 border-inverse-surface">
+              <span class="material-symbols-outlined text-3xl">trending_up</span>
+            </div>
+            <div><h3 class="font-black text-lg font-headline uppercase leading-none">Net Worth</h3><p id="intel-net-worth" class="text-2xl font-black">$12,400.67</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Deep Dive -->
+      <div class="md:col-span-12 bg-surface-container-lowest border-4 border-inverse-surface p-6 hard-shadow-lg">
+        <h2 id="intel-deep-dive-title" class="text-2xl font-black font-headline uppercase mb-6">Deep Dive: Treat Yourself</h2>
+        <div class="flex flex-col md:flex-row gap-8 items-center">
+          <div class="relative w-48 h-48 border-8 border-inverse-surface rounded-full flex items-center justify-center bg-white hard-shadow shrink-0">
+            <div class="absolute inset-0 rounded-full border-[20px] border-primary-container border-r-secondary-container border-b-tertiary-container"></div>
+            <div class="z-10 text-center"><p class="font-black text-2xl">$1,200</p><p class="text-[10px] font-bold uppercase">Budget</p></div>
+          </div>
+          <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+            <div class="border-2 border-inverse-surface p-3 flex justify-between items-center hard-shadow-sm hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform cursor-pointer">
+              <div class="flex items-center gap-3"><span class="material-symbols-outlined text-secondary">shopping_bag</span><span class="font-bold text-sm uppercase">Streetwear Drops</span></div><span class="font-black">$640.00</span>
+            </div>
+            <div class="border-2 border-inverse-surface p-3 flex justify-between items-center hard-shadow-sm hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform cursor-pointer">
+              <div class="flex items-center gap-3"><span class="material-symbols-outlined text-primary">restaurant</span><span class="font-bold text-sm uppercase">Overpriced Tacos</span></div><span class="font-black">$320.00</span>
+            </div>
+            <div class="border-2 border-inverse-surface p-3 flex justify-between items-center hard-shadow-sm hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform cursor-pointer">
+              <div class="flex items-center gap-3"><span class="material-symbols-outlined text-tertiary">movie</span><span class="font-bold text-sm uppercase">Subscriptions</span></div><span class="font-black">$180.00</span>
+            </div>
+            <div class="border-2 border-inverse-surface p-3 flex justify-between items-center hard-shadow-sm hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform cursor-pointer">
+              <div class="flex items-center gap-3"><span class="material-symbols-outlined text-on-surface-variant">more_horiz</span><span class="font-bold text-sm uppercase">Misc Chaos</span></div><span class="font-black">$60.00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Forecast Lab -->
+      <div class="md:col-span-12 bg-white border-4 border-inverse-surface p-6 hard-shadow-lg">
+        <div class="flex flex-wrap justify-between items-start gap-4">
+          <div>
+            <h2 class="text-2xl font-black font-headline uppercase leading-none">Forecast Lab</h2>
+            <p class="font-bold text-xs uppercase tracking-wider text-on-surface-variant mt-2">Simulate behavior changes before next week hits</p>
+          </div>
+          <div class="bg-primary-container border-2 border-inverse-surface px-3 py-2 text-xs font-black uppercase">What-if Engine</div>
+        </div>
+        <div class="mt-5 grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="border-2 border-inverse-surface p-4 bg-surface-container">
+            <p class="text-[10px] font-black uppercase tracking-widest mb-3">Reduce weekly coffee spending</p>
+            <input id="intel-cut-slider" type="range" min="0" max="100" value="20" class="w-full accent-[#4e6300]"/>
+            <div class="mt-3 flex items-center justify-between">
+              <span class="text-xs font-bold uppercase">Cut level</span>
+              <span id="intel-cut-value" class="font-headline font-black text-xl">20%</span>
+            </div>
+          </div>
+          <div class="border-2 border-inverse-surface p-4 bg-tertiary-container">
+            <p class="text-[10px] font-black uppercase tracking-widest mb-3">Projected impact</p>
+            <p id="intel-cut-impact" class="font-headline font-black text-3xl leading-none">$0.00</p>
+            <p id="intel-cut-caption" class="text-xs font-bold mt-2">Annual savings from this behavior shift</p>
+            <button id="intel-forecast-apply" class="mt-4 border-2 border-inverse-surface bg-white px-4 py-2 text-xs font-black uppercase hard-shadow-sm hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all">
+              Create Savings Rule
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hero Insight -->
+      <div class="md:col-span-12 relative h-64 border-4 border-inverse-surface hard-shadow-lg overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-purple-900 via-indigo-800 to-yellow-500"></div>
+        <div class="absolute inset-0 flex items-end p-6">
+          <div>
+            <span class="bg-primary text-on-primary px-2 py-1 font-black text-xs uppercase mb-2 inline-block">Pro Intel</span>
+            <h2 class="text-3xl font-black text-white font-headline uppercase leading-none mb-2">Cut the coffee, buy the dip.</h2>
+            <p class="text-white font-bold opacity-80 max-w-lg">If you redirected your daily $7 oat milk latte into your "BUCKETS", you'd have $2,555 by next year. No cap.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+
+<!-- ─── BOTTOM NAV ─── -->
+<nav class="fixed bottom-0 left-0 w-full h-20 grid grid-cols-4 items-stretch overflow-hidden bg-[#cafd00] border-t-4 border-[#0c0f0f] z-50">
+  <button id="nav-dash"    onclick="navigate('dash')"    class="nav-btn flex flex-col items-center justify-center text-[#0c0f0f] h-full border-r-2 border-[#0c0f0f] hover:bg-[#bba2ff] transition-colors">
+    <span class="material-symbols-outlined">grid_view</span><span class="font-headline font-bold text-xs uppercase">DASH</span>
+  </button>
+  <button id="nav-feed"    onclick="navigate('feed')"    class="nav-btn flex flex-col items-center justify-center text-[#0c0f0f] h-full border-r-2 border-[#0c0f0f] hover:bg-[#bba2ff] transition-colors">
+    <span class="material-symbols-outlined">forum</span><span class="font-headline font-bold text-xs uppercase">FEED</span>
+  </button>
+  <button id="nav-buckets" onclick="navigate('buckets')" class="nav-btn flex flex-col items-center justify-center text-[#0c0f0f] h-full border-r-2 border-[#0c0f0f] hover:bg-[#bba2ff] transition-colors">
+    <span class="material-symbols-outlined">shopping_basket</span><span class="font-headline font-bold text-xs uppercase">BUCKETS</span>
+  </button>
+  <button id="nav-intel"   onclick="navigate('intel')"   class="nav-btn flex flex-col items-center justify-center text-[#0c0f0f] h-full hover:bg-[#bba2ff] transition-colors">
+    <span class="material-symbols-outlined">analytics</span><span class="font-headline font-bold text-xs uppercase">INTEL</span>
+  </button>
+</nav>
+
+
+<script>
+let currentPage = 'dash';
+let currentIntelTab = 'month';
+let activeCurrency = 'USD';
+let toastTimer;
+let feedFilter = 'all';
+let feedSearchTerm = '';
+let feedSortMode = 'impact';
+
+const STORAGE_KEYS = {
+  darkMode: 'stash-dark-mode',
+  currency: 'stash-currency',
+  appState: 'stash-app-state-v2'
+};
+
+const CURRENCIES = {
+  USD: { code: 'USD', label: 'US Dollar', locale: 'en-US', usdRate: 1 },
+  EUR: { code: 'EUR', label: 'Euro', locale: 'en-IE', usdRate: 0.92 },
+  INR: { code: 'INR', label: 'Indian Rupee', locale: 'en-IN', usdRate: 83.15 },
+  GBP: { code: 'GBP', label: 'British Pound', locale: 'en-GB', usdRate: 0.79 }
+};
+
+const DYNAMIC_CURRENCY_IDS = new Set([
+  'total-liquidity-value',
+  'intel-total-damage',
+  'intel-net-worth',
+  'intel-bar-1-value',
+  'intel-bar-2-value',
+  'intel-bar-3-value',
+  'intel-bar-4-value',
+  'feed-summary-total',
+  'intel-cut-impact'
+]);
+
+const trackedMoneyNodes = new WeakSet();
+const moneyTextEntries = [];
+const modalState = { submitHandler: null };
+const commandPaletteState = { selectedIndex: 0, filteredActions: [] };
+
+const DEFAULT_APP_STATE = {
+  liquidityBalanceUsd: 42069,
+  customBuckets: [],
+  lastForecastCutPct: 20
+};
+
+function loadAppState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.appState);
+    if (!raw) return { ...DEFAULT_APP_STATE, customBuckets: [] };
+    const parsed = JSON.parse(raw);
+    return {
+      liquidityBalanceUsd: Number(parsed.liquidityBalanceUsd) || DEFAULT_APP_STATE.liquidityBalanceUsd,
+      customBuckets: Array.isArray(parsed.customBuckets) ? parsed.customBuckets : [],
+      lastForecastCutPct: Number(parsed.lastForecastCutPct) || DEFAULT_APP_STATE.lastForecastCutPct
+    };
+  } catch (_) {
+    return { ...DEFAULT_APP_STATE, customBuckets: [] };
+  }
+}
+
+const appState = loadAppState();
+
+function persistAppState() {
+  localStorage.setItem(STORAGE_KEYS.appState, JSON.stringify(appState));
+}
+
+const intelSnapshots = {
+  month: {
+    totalDamage: 2450,
+    bars: [
+      { label: 'Treat Yourself', amount: 1200, height: 85 },
+      { label: 'Rent & Cry', amount: 800, height: 60 },
+      { label: 'Coffee Addiction', amount: 450, height: 35 },
+      { label: 'Actual Savings', amount: 0, height: 15 }
+    ],
+    pulse: [140, 170, 130, 210, 180, 200, 260],
+    coffeeWeeklyUsd: 54,
+    deepDiveTitle: 'Treat Yourself',
+    netWorth: 12400.67
+  },
+  history: {
+    totalDamage: 9860,
+    bars: [
+      { label: 'Rent & Bills', amount: 3600, height: 78 },
+      { label: 'Travel & Events', amount: 2800, height: 62 },
+      { label: 'Food & Coffee', amount: 2140, height: 47 },
+      { label: 'Investments', amount: 1320, height: 30 }
+    ],
+    pulse: [90, 105, 120, 165, 145, 170, 155],
+    coffeeWeeklyUsd: 68,
+    deepDiveTitle: 'Travel & Events',
+    netWorth: 13840.52
+  }
+};
+
+const smartInsightTransactions = [
+  { merchant: 'BURGER REBEL', category: 'Food', amountUsd: -24.5, when: 'Today, 2:45 PM', icon: 'lunch_dining' },
+  { merchant: 'VIBE FESTIVAL', category: 'Entertainment', amountUsd: -189, when: 'Yesterday, 9:12 PM', icon: 'local_activity' },
+  { merchant: 'GLITCH COFFEE', category: 'Coffee', amountUsd: -6.75, when: 'Yesterday, 8:05 AM', icon: 'local_cafe' },
+  { merchant: 'URBAN OUTFIT', category: 'Shopping', amountUsd: -112.99, when: 'Nov 12, 4:20 PM', icon: 'shopping_bag' },
+  { merchant: 'CITY TRANSIT', category: 'Transport', amountUsd: -34.2, when: 'Nov 12, 9:05 AM', icon: 'directions_bus' },
+  { merchant: 'STREAMBOX', category: 'Bills', amountUsd: -19.99, when: 'Nov 11, 11:58 PM', icon: 'subscriptions' },
+  { merchant: 'PAYDAY DEPOSIT', category: 'Income', amountUsd: 3500, when: 'Nov 11, 8:00 AM', icon: 'payments' },
+  { merchant: 'GROCERY LOOP', category: 'Food', amountUsd: -84.3, when: 'Nov 10, 6:15 PM', icon: 'storefront' }
+];
+
+const previousWeekCategorySpendUsd = {
+  Food: 82,
+  Entertainment: 110,
+  Coffee: 18,
+  Shopping: 165,
+  Transport: 52,
+  Bills: 22
+};
+
+const insightTagMeta = {
+  overspending: { label: '⚠️ Overspending', className: 'bg-error-container text-on-error-container' },
+  saved: { label: '💰 Saved', className: 'bg-primary-container text-on-primary-container' },
+  trend: { label: '📊 Trend spike', className: 'bg-tertiary-container text-on-tertiary-container' }
+};
+
+function parseNumericInput(value) {
+  return Number(String(value).replace(/[^0-9.]/g, ''));
+}
+
+function usdToDisplay(amountUsd) {
+  return amountUsd * CURRENCIES[activeCurrency].usdRate;
+}
+
+function displayToUsd(amountDisplay) {
+  return amountDisplay / CURRENCIES[activeCurrency].usdRate;
+}
+
+function formatUsdMoney(amountUsd, minimumFractionDigits = 2, maximumFractionDigits = 2) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: minimumFractionDigits,
+    maximumFractionDigits: maximumFractionDigits
+  }).format(amountUsd);
+}
+
+function formatMoney(amountUsd, options = {}) {
+  const minimumFractionDigits = options.minimumFractionDigits !== undefined ? options.minimumFractionDigits : 2;
+  const maximumFractionDigits = options.maximumFractionDigits !== undefined ? options.maximumFractionDigits : 2;
+  const amount = usdToDisplay(amountUsd);
+  const meta = CURRENCIES[activeCurrency];
+
+  return new Intl.NumberFormat(meta.locale, {
+    style: 'currency',
+    currency: meta.code,
+    minimumFractionDigits: minimumFractionDigits,
+    maximumFractionDigits: maximumFractionDigits
+  }).format(amount);
+}
+
+function formatCompactMoney(amountUsd) {
+  const meta = CURRENCIES[activeCurrency];
+  return new Intl.NumberFormat(meta.locale, {
+    style: 'currency',
+    currency: meta.code,
+    notation: 'compact',
+    maximumFractionDigits: 1
+  }).format(usdToDisplay(amountUsd));
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function escapeAttr(value) {
+  return escapeHtml(value).replace(/`/g, '&#96;');
+}
+
+function clamp(num, min, max) {
+  return Math.max(min, Math.min(max, num));
+}
+
+function normalizeBucketRecord(raw) {
+  const name = String(raw.name || '').trim();
+  const targetUsd = Number(raw.targetUsd);
+  const savedUsd = Number(raw.savedUsd);
+  if (!name || !Number.isFinite(targetUsd) || targetUsd <= 0 || !Number.isFinite(savedUsd) || savedUsd < 0) return null;
+  const safeSaved = clamp(savedUsd, 0, targetUsd);
+  return { name: name, targetUsd: targetUsd, savedUsd: safeSaved };
+}
+
+function makeBucketCardElement(bucket) {
+  const progress = Math.round((bucket.savedUsd / bucket.targetUsd) * 100);
+  const leftUsd = Math.max(bucket.targetUsd - bucket.savedUsd, 0);
+  const card = document.createElement('div');
+  card.dataset.customBucket = 'true';
+  card.dataset.bucketName = bucket.name.toLowerCase();
+  card.className = 'bg-white border-4 border-inverse-surface p-6 hard-shadow flex flex-col h-full hover:-translate-x-1 hover:-translate-y-1 hover:hard-shadow-lg transition-all cursor-pointer group';
+  card.innerHTML = `
+    <div class="flex justify-between items-start mb-6">
+      <div class="bg-primary-container border-2 border-inverse-surface p-3 rotate-[3deg] group-hover:rotate-0 transition-transform">
+        <span class="material-symbols-outlined text-4xl" style="font-variation-settings:'FILL' 1;">savings</span>
+      </div>
+      <span class="font-headline font-black text-2xl">${progress}%</span>
+    </div>
+    <h3 class="font-headline text-3xl font-black mb-2 uppercase tracking-tight">${escapeHtml(bucket.name)}</h3>
+    <p class="font-body font-bold text-on-surface-variant mb-6 text-sm">Target: ${formatUsdMoney(bucket.targetUsd)}</p>
+    <div class="mt-auto">
+      <div class="w-full h-12 border-4 border-inverse-surface bg-surface-container overflow-hidden flex">
+        <div class="h-full bg-primary border-r-4 border-inverse-surface" style="width:${progress}%"></div>
+      </div>
+      <div class="flex justify-between mt-2">
+        <span class="font-headline font-bold text-sm">${formatUsdMoney(bucket.savedUsd)} saved</span>
+        <span class="font-headline font-bold text-sm text-on-surface-variant">${formatUsdMoney(leftUsd)} left</span>
+      </div>
+    </div>
+  `;
+  return card;
+}
+
+function renderCustomBucketsFromState() {
+  const grid = document.getElementById('buckets-grid');
+  const emptyState = document.getElementById('bucket-empty-state');
+  if (!grid || !emptyState) return;
+
+  Array.from(grid.querySelectorAll('[data-custom-bucket="true"]')).forEach(el => el.remove());
+
+  appState.customBuckets.forEach(bucket => {
+    const bucketEl = makeBucketCardElement(bucket);
+    grid.insertBefore(bucketEl, emptyState);
+    trackMoneyTextNodes(bucketEl);
+  });
+}
+
+function addOrUpdateCustomBucket(rawBucket, options = {}) {
+  const notify = options.notify !== false;
+  const mergeByName = options.mergeByName === true;
+  const bucket = normalizeBucketRecord(rawBucket);
+  if (!bucket) return false;
+
+  if (mergeByName) {
+    const index = appState.customBuckets.findIndex(item => item.name.toLowerCase() === bucket.name.toLowerCase());
+    if (index >= 0) {
+      appState.customBuckets[index] = bucket;
+    } else {
+      appState.customBuckets.push(bucket);
+    }
+  } else {
+    appState.customBuckets.push(bucket);
+  }
+
+  persistAppState();
+  renderCustomBucketsFromState();
+  renderTrackedMoneyText();
+  if (notify) showToast(bucket.name + ' bucket synced 🎯');
+  return true;
+}
+
+// ── Navigation ──
+function getActiveNavBackground() {
+  return document.documentElement.classList.contains('dark') ? '#314654' : '#ffbdf3';
+}
+
+function navigate(page) {
+  if (page === currentPage) return;
+  document.getElementById('page-' + currentPage).classList.remove('active');
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    b.style.background = '';
+    b.querySelector('.material-symbols-outlined').style.fontVariationSettings = "'FILL' 0,'wght' 700,'GRAD' 0,'opsz' 48";
+  });
+  currentPage = page;
+  document.getElementById('page-' + page).classList.add('active');
+  const activeButton = document.getElementById('nav-' + page);
+  activeButton.style.background = getActiveNavBackground();
+  activeButton.querySelector('.material-symbols-outlined').style.fontVariationSettings = "'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 48";
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  document.getElementById('notif-drawer').classList.add('hidden');
+}
+
+// Boot: show dash, highlight its nav button
+document.getElementById('page-dash').classList.add('active');
+document.getElementById('nav-dash').style.background = getActiveNavBackground();
+document.getElementById('nav-dash').querySelector('.material-symbols-outlined').style.fontVariationSettings = "'FILL' 1,'wght' 700,'GRAD' 0,'opsz' 48";
+
+// ── Toast ──
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.style.opacity = '1';
+  toast.style.pointerEvents = 'auto';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.pointerEvents = 'none';
+  }, 2400);
+}
+
+function getCommandActions() {
+  return [
+    { id: 'go-dash', label: 'Go to Dash', hint: 'Navigation', keywords: 'dash home overview', run: () => navigate('dash') },
+    { id: 'go-feed', label: 'Go to Smart Insights', hint: 'Navigation', keywords: 'feed insights smart', run: () => navigate('feed') },
+    { id: 'go-buckets', label: 'Go to Buckets', hint: 'Navigation', keywords: 'buckets goals stash', run: () => navigate('buckets') },
+    { id: 'go-intel', label: 'Go to Intel', hint: 'Navigation', keywords: 'intel analytics charts', run: () => navigate('intel') },
+    { id: 'load-up', label: 'Open Load Up', hint: 'Quick action', keywords: 'load add money funds', run: () => loadUpBalance() },
+    { id: 'new-bucket', label: 'Create New Bucket', hint: 'Quick action', keywords: 'bucket goal create', run: () => createBucket() },
+    { id: 'toggle-dark', label: document.documentElement.classList.contains('dark') ? 'Switch to Light Mode' : 'Switch to Dark Mode', hint: 'Appearance', keywords: 'dark light theme', run: () => setDarkMode(!document.documentElement.classList.contains('dark'), { notify: true }) },
+    { id: 'refresh-insights', label: 'Refresh Insight Models', hint: 'Analysis', keywords: 'refresh recalc insights', run: () => { renderCurrencySensitiveUI(); showToast('Insight models refreshed.'); } },
+    { id: 'export-report', label: 'Export Weekly Intelligence Report', hint: 'Output', keywords: 'export report weekly intelligence', run: () => exportWeeklyReport() }
+  ];
+}
+
+function getFilteredCommandActions(query) {
+  const clean = (query || '').trim().toLowerCase();
+  const actions = getCommandActions();
+  if (!clean) return actions;
+  return actions.filter(action => {
+    const haystack = (action.label + ' ' + action.hint + ' ' + action.keywords).toLowerCase();
+    return haystack.includes(clean);
+  });
+}
+
+function renderCommandPalette(query) {
+  const list = document.getElementById('command-list');
+  commandPaletteState.filteredActions = getFilteredCommandActions(query);
+  commandPaletteState.selectedIndex = clamp(commandPaletteState.selectedIndex, 0, Math.max(commandPaletteState.filteredActions.length - 1, 0));
+
+  if (!commandPaletteState.filteredActions.length) {
+    list.innerHTML = '<div class="px-4 py-4 text-sm font-bold text-on-surface-variant">No matching commands</div>';
+    return;
+  }
+
+  list.innerHTML = commandPaletteState.filteredActions.map((action, index) => `
+    <button type="button" class="command-item w-full text-left px-4 py-3 flex items-center justify-between gap-2" data-command-id="${action.id}" aria-selected="${index === commandPaletteState.selectedIndex ? 'true' : 'false'}">
+      <span class="font-bold text-sm">${escapeHtml(action.label)}</span>
+      <span class="text-[10px] font-black uppercase text-on-surface-variant">${escapeHtml(action.hint)}</span>
+    </button>
+  `).join('');
+}
+
+function isCommandPaletteOpen() {
+  return document.getElementById('command-palette').classList.contains('open');
+}
+
+function openCommandPalette() {
+  if (isActionModalOpen()) return;
+  document.getElementById('command-palette-overlay').classList.add('open');
+  document.getElementById('command-palette').classList.add('open');
+  document.body.classList.add('overflow-hidden');
+  const input = document.getElementById('command-input');
+  input.value = '';
+  commandPaletteState.selectedIndex = 0;
+  renderCommandPalette('');
+  input.focus();
+}
+
+function closeCommandPalette() {
+  document.getElementById('command-palette-overlay').classList.remove('open');
+  document.getElementById('command-palette').classList.remove('open');
+  document.body.classList.remove('overflow-hidden');
+}
+
+function runSelectedCommand(index = commandPaletteState.selectedIndex) {
+  const action = commandPaletteState.filteredActions[index];
+  if (!action) return;
+  closeCommandPalette();
+  action.run();
+}
+
+function setFeedFilter(filter) {
+  feedFilter = filter || 'all';
+  document.querySelectorAll('[data-feed-filter]').forEach(chip => {
+    chip.dataset.active = chip.getAttribute('data-feed-filter') === feedFilter ? 'true' : 'false';
+  });
+  renderSmartInsightsFeed();
+}
+
+function closeSettings() {
+  document.getElementById('settings-panel').style.transform = 'translateX(100%)';
+  document.getElementById('settings-overlay').classList.add('hidden');
+}
+
+function setDarkMode(enabled, options = {}) {
+  const persist = options.persist !== false;
+  const notify = options.notify === true;
+
+  document.documentElement.classList.toggle('dark', enabled);
+  document.getElementById('dark-toggle').checked = enabled;
+  document.getElementById('nav-' + currentPage).style.background = getActiveNavBackground();
+
+  if (persist) localStorage.setItem(STORAGE_KEYS.darkMode, enabled ? '1' : '0');
+  if (notify) showToast(enabled ? 'Dark mode on 🌙' : 'Light mode on ☀️');
+}
+
+function isInsideDynamicCurrencyZone(node) {
+  let parent = node.parentElement;
+  while (parent) {
+    if (DYNAMIC_CURRENCY_IDS.has(parent.id)) return true;
+    parent = parent.parentElement;
+  }
+  return false;
+}
+
+function trackMoneyTextNodes(root) {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode: function(node) {
+      if (!node.nodeValue || node.nodeValue.indexOf('$') === -1 || !/[0-9]/.test(node.nodeValue)) {
+        return NodeFilter.FILTER_REJECT;
+      }
+      if (trackedMoneyNodes.has(node)) return NodeFilter.FILTER_REJECT;
+      const parent = node.parentElement;
+      if (!parent) return NodeFilter.FILTER_REJECT;
+      if (isInsideDynamicCurrencyZone(node)) return NodeFilter.FILTER_REJECT;
+      const tag = parent.tagName;
+      if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'NOSCRIPT' || tag === 'OPTION' || tag === 'TEXTAREA') {
+        return NodeFilter.FILTER_REJECT;
+      }
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+
+  let node;
+  while ((node = walker.nextNode())) {
+    const original = node.nodeValue;
+    const pattern = /([+-]?)\$([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?)(k?)/g;
+    const parts = [];
+    let template = '';
+    let lastIndex = 0;
+    let match;
+
+    while ((match = pattern.exec(original)) !== null) {
+      const numericString = match[2].replace(/,/g, '');
+      const numericValue = Number(numericString);
+      if (!Number.isFinite(numericValue)) continue;
+
+      const isCompact = match[3].toLowerCase() === 'k';
+      const amountUsd = isCompact ? numericValue * 1000 : numericValue;
+      const decimals = numericString.includes('.') ? numericString.split('.')[1].length : 0;
+
+      template += original.slice(lastIndex, match.index) + '__M' + parts.length + '__';
+      parts.push({
+        sign: match[1] || '',
+        amountUsd: amountUsd,
+        compact: isCompact,
+        decimals: decimals
+      });
+      lastIndex = pattern.lastIndex;
+    }
+
+    if (!parts.length) continue;
+    template += original.slice(lastIndex);
+    trackedMoneyNodes.add(node);
+    moneyTextEntries.push({ node: node, template: template, parts: parts });
+  }
+}
+
+function formatTrackedMoneyPart(part) {
+  if (part.compact) {
+    const compactAbs = formatCompactMoney(Math.abs(part.amountUsd)).replace(/^[-+]/, '');
+    if (part.sign === '-') return '-' + compactAbs;
+    if (part.sign === '+') return '+' + compactAbs;
+    return formatCompactMoney(part.amountUsd);
+  }
+
+  const decimals = part.decimals;
+  const abs = formatMoney(Math.abs(part.amountUsd), {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
+  }).replace(/^[-+]/, '');
+
+  if (part.sign === '-') return '-' + abs;
+  if (part.sign === '+') return '+' + abs;
+  return formatMoney(part.amountUsd, {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
+  });
+}
+
+function renderTrackedMoneyText() {
+  moneyTextEntries.forEach(entry => {
+    let rendered = entry.template;
+    entry.parts.forEach((part, index) => {
+      rendered = rendered.replace('__M' + index + '__', formatTrackedMoneyPart(part));
+    });
+    entry.node.nodeValue = rendered;
+  });
+}
+
+function roundPct(value) {
+  return Math.round(value);
+}
+
+function computeSmartFeedMetrics() {
+  const currentWeekSpendByCategory = {};
+  let totalSpendUsd = 0;
+
+  smartInsightTransactions.forEach(tx => {
+    if (tx.amountUsd >= 0) return;
+    const spend = Math.abs(tx.amountUsd);
+    currentWeekSpendByCategory[tx.category] = (currentWeekSpendByCategory[tx.category] || 0) + spend;
+    totalSpendUsd += spend;
+  });
+
+  const categories = new Set([
+    ...Object.keys(previousWeekCategorySpendUsd),
+    ...Object.keys(currentWeekSpendByCategory)
+  ]);
+
+  const categoryDeltaPct = {};
+  let riskCategory = null;
+  let riskDelta = -Infinity;
+  let winCategory = null;
+  let winDelta = Infinity;
+
+  categories.forEach(category => {
+    const prev = previousWeekCategorySpendUsd[category] || 0;
+    const current = currentWeekSpendByCategory[category] || 0;
+    const delta = prev > 0 ? roundPct(((current - prev) / prev) * 100) : (current > 0 ? 100 : 0);
+    categoryDeltaPct[category] = delta;
+
+    if (delta > riskDelta) {
+      riskDelta = delta;
+      riskCategory = category;
+    }
+    if (delta < winDelta) {
+      winDelta = delta;
+      winCategory = category;
+    }
+  });
+
+  return {
+    totalSpendUsd: totalSpendUsd,
+    avgDailySpendUsd: totalSpendUsd / 7,
+    currentWeekSpendByCategory: currentWeekSpendByCategory,
+    previousWeekSpendByCategory: previousWeekCategorySpendUsd,
+    categoryDeltaPct: categoryDeltaPct,
+    riskCategory: riskCategory,
+    riskDelta: riskDelta,
+    winCategory: winCategory,
+    winDelta: winDelta
+  };
+}
+
+function buildTransactionInsight(tx, metrics) {
+  const tags = [];
+
+  if (tx.amountUsd > 0) {
+    const coverageDays = Math.max(1, Math.round(tx.amountUsd / Math.max(metrics.avgDailySpendUsd, 1)));
+    if (!tags.includes('saved')) tags.push('saved');
+    if (tx.amountUsd > metrics.avgDailySpendUsd * 4) tags.push('trend');
+    return {
+      insight: 'This credit can fund about ' + coverageDays + ' day' + (coverageDays === 1 ? '' : 's') + ' at your current spending pace.',
+      pattern: 'Income injections are cushioning your weekly burn and extending runway.',
+      tags: tags
+    };
+  }
+
+  const category = tx.category;
+  const categoryWeeklySpend = metrics.currentWeekSpendByCategory[category] || 0;
+  const delta = metrics.categoryDeltaPct[category] || 0;
+  const shareOfWeek = metrics.totalSpendUsd > 0 ? roundPct((categoryWeeklySpend / metrics.totalSpendUsd) * 100) : 0;
+  const txShareInCategory = categoryWeeklySpend > 0 ? roundPct((Math.abs(tx.amountUsd) / categoryWeeklySpend) * 100) : 0;
+
+  let insight = '';
+  let pattern = '';
+
+  if (delta >= 20) {
+    insight = 'You spent ' + delta + '% more on ' + category + ' this week than last week.';
+    pattern = category + ' momentum is accelerating and now drives ' + shareOfWeek + '% of weekly outflow.';
+    tags.push('overspending');
+  } else if (delta <= -10) {
+    insight = category + ' spend is down ' + Math.abs(delta) + '% week-over-week, a clear behavior improvement.';
+    pattern = 'This transaction still accounts for ' + txShareInCategory + '% of ' + category + ' activity this week.';
+    tags.push('saved');
+  } else {
+    insight = category + ' is stable week-over-week, but this transaction takes ' + txShareInCategory + '% of current ' + category + ' spend.';
+    pattern = 'No dramatic shift yet, so trend risk depends on repeat purchases in this category.';
+  }
+
+  if (Math.abs(delta) >= 35 || Math.abs(tx.amountUsd) >= 140) tags.push('trend');
+  if (!tags.length) tags.push('trend');
+
+  return { insight: insight, pattern: pattern, tags: tags };
+}
+
+function getInsightCardTone(tags) {
+  if (tags.includes('overspending')) return 'bg-error-container text-on-error-container';
+  if (tags.includes('saved')) return 'bg-primary-container text-on-primary-container';
+  return 'bg-tertiary-container text-on-tertiary-container';
+}
+
+function renderSmartInsightsFeed() {
+  const container = document.getElementById('smart-insights-list');
+  if (!container) return;
+
+  const metrics = computeSmartFeedMetrics();
+  const riskText = metrics.riskCategory ? metrics.riskCategory + ' +' + Math.max(metrics.riskDelta, 0) + '%' : 'No risk spike';
+  const winText = metrics.winCategory ? metrics.winCategory + ' ' + (metrics.winDelta > 0 ? '+' : '') + metrics.winDelta + '%' : 'No savings pattern';
+
+  document.getElementById('feed-summary-total').textContent = formatMoney(metrics.totalSpendUsd);
+  document.getElementById('feed-summary-risk').textContent = riskText;
+  document.getElementById('feed-summary-win').textContent = winText;
+  const overspendingCount = smartInsightTransactions.filter(tx => tx.amountUsd < 0 && (metrics.categoryDeltaPct[tx.category] || 0) >= 20).length;
+  const savedCount = smartInsightTransactions.filter(tx => tx.amountUsd > 0 || (metrics.categoryDeltaPct[tx.category] || 0) <= -10).length;
+  const behaviorScore = clamp(100 - Math.max(metrics.riskDelta, 0) - overspendingCount * 4 + savedCount * 3, 15, 99);
+  document.getElementById('feed-summary-score').textContent = Math.round(behaviorScore);
+
+  const enriched = smartInsightTransactions.map((tx, idx) => {
+    const insightData = buildTransactionInsight(tx, metrics);
+    const impactScore = Math.abs(tx.amountUsd) * (insightData.tags.includes('overspending') ? 1.4 : 1) * (insightData.tags.includes('trend') ? 1.15 : 1);
+    return { tx: tx, insightData: insightData, impactScore: impactScore, idx: idx };
+  });
+
+  let filtered = enriched.filter(item => {
+    if (feedFilter !== 'all' && !item.insightData.tags.includes(feedFilter)) return false;
+    if (!feedSearchTerm) return true;
+    const hay = (item.tx.merchant + ' ' + item.tx.category + ' ' + item.insightData.insight + ' ' + item.insightData.pattern).toLowerCase();
+    return hay.includes(feedSearchTerm.toLowerCase());
+  });
+
+  if (feedSortMode === 'amount') {
+    filtered.sort((a, b) => Math.abs(b.tx.amountUsd) - Math.abs(a.tx.amountUsd));
+  } else if (feedSortMode === 'latest') {
+    filtered.sort((a, b) => a.idx - b.idx);
+  } else {
+    filtered.sort((a, b) => b.impactScore - a.impactScore);
+  }
+
+  if (!filtered.length) {
+    container.innerHTML = '<div class="bg-white border-4 border-inverse-surface p-6 hard-shadow"><p class="font-headline font-black text-2xl uppercase">No matching insights</p><p class="font-bold text-on-surface-variant mt-2">Try broadening filters or search.</p></div>';
+    return;
+  }
+
+  container.innerHTML = filtered.map(item => {
+    const tx = item.tx;
+    const insightData = item.insightData;
+    const amountClass = tx.amountUsd >= 0 ? 'text-primary-dim' : 'text-error';
+    const amountPrefix = tx.amountUsd >= 0 ? '+' : '-';
+    const insightTone = getInsightCardTone(insightData.tags);
+    const tagHtml = insightData.tags.map(tag => {
+      const meta = insightTagMeta[tag];
+      if (!meta) return '';
+      return '<span class="' + meta.className + ' border border-inverse-surface px-2 py-1 text-[11px] font-black uppercase tracking-wide">' + meta.label + '</span>';
+    }).join('');
+
+    return `
+      <article class="bg-white border-4 border-inverse-surface p-5 hard-shadow hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all">
+        <div class="flex items-start justify-between gap-3 flex-wrap">
+          <div class="flex items-start gap-3">
+            <div class="w-12 h-12 bg-surface-container border-2 border-inverse-surface flex items-center justify-center hard-shadow-sm">
+              <span class="material-symbols-outlined">${tx.icon}</span>
+            </div>
+            <div>
+              <h3 class="font-headline font-black text-2xl uppercase tracking-tight leading-none">${escapeHtml(tx.merchant)}</h3>
+              <p class="text-on-surface-variant font-bold text-xs uppercase mt-1">${escapeHtml(tx.when)} • ${escapeHtml(tx.category)}</p>
+            </div>
+          </div>
+          <p class="font-headline font-black text-2xl ${amountClass}">${amountPrefix}${formatMoney(Math.abs(tx.amountUsd))}</p>
+        </div>
+        <div class="mt-4 border-2 border-inverse-surface p-3 ${insightTone}">
+          <p class="font-headline font-black text-[10px] uppercase tracking-widest opacity-80">AI Insight</p>
+          <p class="font-bold text-sm mt-1">${escapeHtml(insightData.insight)}</p>
+        </div>
+        <div class="mt-3 flex flex-wrap gap-2">${tagHtml}</div>
+        <p class="mt-3 text-[11px] font-bold uppercase text-on-surface-variant">Pattern: ${escapeHtml(insightData.pattern)}</p>
+      </article>
+    `;
+  }).join('');
+}
+
+function exportWeeklyReport() {
+  const metrics = computeSmartFeedMetrics();
+  const lines = [
+    '# Weekly Intelligence Report',
+    '',
+    '- Total spend: ' + formatMoney(metrics.totalSpendUsd),
+    '- Risk cluster: ' + (metrics.riskCategory ? metrics.riskCategory + ' (' + metrics.riskDelta + '% WoW)' : 'None'),
+    '- Best shift: ' + (metrics.winCategory ? metrics.winCategory + ' (' + metrics.winDelta + '% WoW)' : 'None'),
+    '',
+    '## Transaction Insights',
+    ''
+  ];
+
+  smartInsightTransactions.forEach(tx => {
+    const insight = buildTransactionInsight(tx, metrics);
+    const amount = (tx.amountUsd >= 0 ? '+' : '-') + formatMoney(Math.abs(tx.amountUsd));
+    lines.push('- ' + tx.merchant + ' (' + tx.category + ', ' + amount + '): ' + insight.insight + ' [' + insight.tags.join(', ') + ']');
+  });
+
+  const blob = new Blob([lines.join('\n')], { type: 'text/markdown;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'stash-weekly-intelligence.md';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+  showToast('Weekly intelligence report exported 📄');
+}
+
+function renderIntelPulse(pulseValues) {
+  const strip = document.getElementById('intel-pulse-strip');
+  const summary = document.getElementById('intel-pulse-summary');
+  if (!strip || !summary || !Array.isArray(pulseValues) || !pulseValues.length) return;
+
+  const peak = Math.max(...pulseValues, 1);
+  const avg = pulseValues.reduce((a, b) => a + b, 0) / pulseValues.length;
+  const last = pulseValues[pulseValues.length - 1];
+  const delta = peak > 0 ? roundPct(((last - avg) / avg) * 100) : 0;
+  summary.textContent = delta >= 0 ? 'today vs avg: +' + delta + '%' : 'today vs avg: ' + delta + '%';
+
+  strip.innerHTML = pulseValues.map((value, index) => {
+    const h = clamp(Math.round((value / peak) * 100), 16, 100);
+    const tone = index === pulseValues.length - 1 ? 'bg-secondary' : 'bg-primary-container';
+    return `<div class="border-2 border-inverse-surface bg-white flex items-end"><div class="w-full ${tone}" style="height:${h}%"></div></div>`;
+  }).join('');
+}
+
+function updateForecastLab() {
+  const slider = document.getElementById('intel-cut-slider');
+  if (!slider) return;
+  const cutPct = clamp(Number(slider.value) || 0, 0, 100);
+  const baseCoffee = intelSnapshots[currentIntelTab]?.coffeeWeeklyUsd || 0;
+  const annualUsd = baseCoffee * (cutPct / 100) * 52;
+  document.getElementById('intel-cut-value').textContent = cutPct + '%';
+  document.getElementById('intel-cut-impact').textContent = formatMoney(annualUsd);
+  document.getElementById('intel-cut-caption').textContent = 'Annual savings if coffee spend drops from ' + formatMoney(baseCoffee) + '/week';
+}
+
+function renderIntel(tab) {
+  const snapshot = intelSnapshots[tab] || intelSnapshots.month;
+  document.getElementById('intel-total-damage').textContent = 'TOTAL DAMAGE: ' + formatMoney(snapshot.totalDamage);
+  document.getElementById('intel-net-worth').textContent = formatMoney(snapshot.netWorth);
+  document.getElementById('intel-deep-dive-title').textContent = 'Deep Dive: ' + snapshot.deepDiveTitle;
+
+  snapshot.bars.forEach((bar, index) => {
+    const i = index + 1;
+    const clampedHeight = Math.max(8, Math.min(100, Number(bar.height) || 0));
+    document.getElementById('intel-bar-' + i).style.height = clampedHeight + '%';
+    document.getElementById('intel-bar-' + i + '-value').textContent = formatCompactMoney(bar.amount);
+    document.getElementById('intel-bar-' + i + '-label').textContent = bar.label;
+  });
+  renderIntelPulse(snapshot.pulse || []);
+  updateForecastLab();
+}
+
+let liquidityBalanceUsd = Number(appState.liquidityBalanceUsd) || parseNumericInput(document.getElementById('total-liquidity-value').textContent || '0');
+
+function renderCurrencySensitiveUI() {
+  document.getElementById('total-liquidity-value').textContent = formatMoney(liquidityBalanceUsd);
+  renderIntel(currentIntelTab);
+  renderSmartInsightsFeed();
+  renderTrackedMoneyText();
+}
+
+function setCurrency(currencyCode, options = {}) {
+  const persist = options.persist !== false;
+  const notify = options.notify === true;
+
+  if (!CURRENCIES[currencyCode]) currencyCode = 'USD';
+  activeCurrency = currencyCode;
+  document.getElementById('currency-select').value = currencyCode;
+
+  renderCurrencySensitiveUI();
+
+  if (persist) localStorage.setItem(STORAGE_KEYS.currency, currencyCode);
+  if (notify) showToast('Currency changed to ' + CURRENCIES[currencyCode].label + ' 💱');
+}
+
+function isActionModalOpen() {
+  return document.getElementById('action-modal').classList.contains('open');
+}
+
+function closeActionModal() {
+  document.getElementById('action-modal').classList.remove('open');
+  document.getElementById('action-modal-overlay').classList.remove('open');
+  document.body.classList.remove('overflow-hidden');
+  document.getElementById('action-modal-form').innerHTML = '';
+  modalState.submitHandler = null;
+}
+
+function openActionModal(config) {
+  const title = document.getElementById('action-modal-title');
+  const subtitle = document.getElementById('action-modal-subtitle');
+  const form = document.getElementById('action-modal-form');
+  const submitButton = document.getElementById('action-modal-submit');
+
+  title.textContent = config.title || 'Action';
+  subtitle.textContent = config.subtitle || '';
+  submitButton.textContent = config.submitLabel || 'Confirm';
+
+  const fields = Array.isArray(config.fields) ? config.fields : [];
+  form.innerHTML = fields.map(field => {
+    const type = field.type || 'text';
+    const step = field.step !== undefined ? ' step="' + escapeAttr(field.step) + '"' : '';
+    const min = field.min !== undefined ? ' min="' + escapeAttr(field.min) + '"' : '';
+    const max = field.max !== undefined ? ' max="' + escapeAttr(field.max) + '"' : '';
+    const required = field.required ? ' required' : '';
+    const value = field.value !== undefined ? ' value="' + escapeAttr(field.value) + '"' : '';
+    const placeholder = field.placeholder ? ' placeholder="' + escapeAttr(field.placeholder) + '"' : '';
+    const inputmode = field.inputmode ? ' inputmode="' + escapeAttr(field.inputmode) + '"' : '';
+    const hint = field.hint ? '<p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wide mt-1">' + escapeHtml(field.hint) + '</p>' : '';
+
+    return (
+      '<label class="block">' +
+        '<span class="font-headline font-black text-xs uppercase tracking-widest text-on-surface-variant">' + escapeHtml(field.label) + '</span>' +
+        '<input name="' + escapeAttr(field.name) + '" type="' + escapeAttr(type) + '"' + value + placeholder + step + min + max + inputmode + required +
+        ' class="mt-2 w-full border-2 border-inverse-surface bg-white px-3 py-3 font-bold text-sm hard-shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary"/>' +
+        hint +
+      '</label>'
+    );
+  }).join('');
+
+  modalState.submitHandler = typeof config.onSubmit === 'function' ? config.onSubmit : null;
+
+  document.getElementById('action-modal').classList.add('open');
+  document.getElementById('action-modal-overlay').classList.add('open');
+  document.body.classList.add('overflow-hidden');
+
+  const firstInput = form.querySelector('input, select, textarea');
+  if (firstInput) firstInput.focus();
+}
+
+function loadUpBalance() {
+  const defaultAmount = usdToDisplay(250).toFixed(2);
+  openActionModal({
+    title: 'Load Up Wallet',
+    subtitle: 'Add funds to your stash instantly.',
+    submitLabel: 'Load Up',
+    fields: [
+      {
+        name: 'amount',
+        label: 'Amount (' + activeCurrency + ')',
+        type: 'number',
+        step: '0.01',
+        min: '0.01',
+        placeholder: '0.00',
+        value: defaultAmount,
+        inputmode: 'decimal',
+        required: true
+      }
+    ],
+    onSubmit: values => {
+      const amountDisplay = Number(values.amount);
+      if (!Number.isFinite(amountDisplay) || amountDisplay <= 0) {
+        showToast('Enter a valid amount above 0.');
+        return false;
+      }
+
+      const amountUsd = displayToUsd(amountDisplay);
+      liquidityBalanceUsd += amountUsd;
+      appState.liquidityBalanceUsd = liquidityBalanceUsd;
+      persistAppState();
+      renderCurrencySensitiveUI();
+      showToast('Loaded ' + formatMoney(amountUsd) + ' successfully ✅');
+      return true;
+    }
+  });
+}
+
+function createBucket() {
+  const defaultTarget = usdToDisplay(1200).toFixed(2);
+  openActionModal({
+    title: 'Create New Bucket',
+    subtitle: 'Build a goal and track it from day one.',
+    submitLabel: 'Create Bucket',
+    fields: [
+      {
+        name: 'name',
+        label: 'Bucket Name',
+        type: 'text',
+        placeholder: 'Weekend Escape',
+        value: 'Weekend Escape',
+        required: true
+      },
+      {
+        name: 'target',
+        label: 'Target (' + activeCurrency + ')',
+        type: 'number',
+        step: '0.01',
+        min: '0.01',
+        placeholder: '0.00',
+        value: defaultTarget,
+        inputmode: 'decimal',
+        required: true
+      },
+      {
+        name: 'saved',
+        label: 'Starting Amount (' + activeCurrency + ')',
+        type: 'number',
+        step: '0.01',
+        min: '0',
+        placeholder: '0.00',
+        value: '0',
+        inputmode: 'decimal',
+        required: true
+      }
+    ],
+    onSubmit: values => {
+      const name = (values.name || '').trim();
+      if (!name) {
+        showToast('Bucket name cannot be empty.');
+        return false;
+      }
+
+      const targetDisplay = Number(values.target);
+      const savedDisplay = Number(values.saved);
+      if (!Number.isFinite(targetDisplay) || targetDisplay <= 0) {
+        showToast('Please enter a valid target amount.');
+        return false;
+      }
+      if (!Number.isFinite(savedDisplay) || savedDisplay < 0) {
+        showToast('Please enter a valid starting amount.');
+        return false;
+      }
+
+      const targetUsd = displayToUsd(targetDisplay);
+      const savedUsd = Math.min(displayToUsd(savedDisplay), targetUsd);
+      const added = addOrUpdateCustomBucket(
+        { name: name, targetUsd: targetUsd, savedUsd: savedUsd },
+        { notify: false, mergeByName: true }
+      );
+      if (!added) {
+        showToast('Unable to create bucket right now.');
+        return false;
+      }
+      showToast(name + ' bucket added 🎯');
+      return true;
+    }
+  });
+}
+
+// ── Notifications ──
+document.getElementById('notif-btn').addEventListener('click', e => {
+  e.stopPropagation();
+  document.getElementById('notif-drawer').classList.toggle('hidden');
+});
+document.getElementById('notif-close').addEventListener('click', () => {
+  document.getElementById('notif-drawer').classList.add('hidden');
+  document.getElementById('notif-btn').classList.remove('notif-badge');
+  showToast('All cleared ✅');
+});
+document.addEventListener('click', e => {
+  if (!e.target.closest('#notif-drawer') && !e.target.closest('#notif-btn')) {
+    document.getElementById('notif-drawer').classList.add('hidden');
+  }
+});
+
+// ── Settings ──
+document.getElementById('settings-btn').addEventListener('click', () => {
+  document.getElementById('settings-panel').style.transform = 'translateX(0)';
+  document.getElementById('settings-overlay').classList.remove('hidden');
+});
+document.getElementById('settings-close').addEventListener('click', closeSettings);
+document.getElementById('settings-overlay').addEventListener('click', closeSettings);
+document.getElementById('dark-toggle').addEventListener('change', function() {
+  setDarkMode(this.checked, { notify: true });
+});
+document.getElementById('currency-select').addEventListener('change', function() {
+  setCurrency(this.value, { notify: true });
+});
+
+// ── Command palette events ──
+document.getElementById('command-btn').addEventListener('click', openCommandPalette);
+document.getElementById('command-palette-overlay').addEventListener('click', closeCommandPalette);
+document.getElementById('command-input').addEventListener('input', function() {
+  commandPaletteState.selectedIndex = 0;
+  renderCommandPalette(this.value);
+});
+document.getElementById('command-input').addEventListener('keydown', function(e) {
+  if (!isCommandPaletteOpen()) return;
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    commandPaletteState.selectedIndex = clamp(commandPaletteState.selectedIndex + 1, 0, commandPaletteState.filteredActions.length - 1);
+    renderCommandPalette(this.value);
+    return;
+  }
+  if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    commandPaletteState.selectedIndex = clamp(commandPaletteState.selectedIndex - 1, 0, commandPaletteState.filteredActions.length - 1);
+    renderCommandPalette(this.value);
+    return;
+  }
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    runSelectedCommand();
+  }
+});
+document.getElementById('command-list').addEventListener('click', function(e) {
+  const button = e.target.closest('[data-command-id]');
+  if (!button) return;
+  const idx = commandPaletteState.filteredActions.findIndex(action => action.id === button.getAttribute('data-command-id'));
+  runSelectedCommand(idx >= 0 ? idx : 0);
+});
+
+// ── Feed control events ──
+document.getElementById('feed-search').addEventListener('input', function() {
+  feedSearchTerm = this.value.trim();
+  renderSmartInsightsFeed();
+});
+document.getElementById('feed-sort').addEventListener('change', function() {
+  feedSortMode = this.value;
+  renderSmartInsightsFeed();
+});
+document.querySelectorAll('[data-feed-filter]').forEach(chip => {
+  chip.addEventListener('click', function() {
+    setFeedFilter(this.getAttribute('data-feed-filter'));
+  });
+});
+
+// ── Forecast lab events ──
+document.getElementById('intel-cut-slider').addEventListener('input', function() {
+  appState.lastForecastCutPct = clamp(Number(this.value) || 0, 0, 100);
+  persistAppState();
+  updateForecastLab();
+});
+document.getElementById('intel-forecast-apply').addEventListener('click', function() {
+  const cutPct = clamp(Number(document.getElementById('intel-cut-slider').value) || 0, 0, 100);
+  const baseCoffee = intelSnapshots[currentIntelTab]?.coffeeWeeklyUsd || 0;
+  const annualUsd = baseCoffee * (cutPct / 100) * 52;
+  const success = addOrUpdateCustomBucket(
+    {
+      name: 'Coffee Cut Reserve',
+      targetUsd: Math.max(annualUsd, 300),
+      savedUsd: 0
+    },
+    { notify: false, mergeByName: true }
+  );
+  if (!success) {
+    showToast('Could not create savings rule right now.');
+    return;
+  }
+  showToast('Savings rule created. Bucket added in Buckets ✅');
+  navigate('buckets');
+});
+
+// ── Action modal events ──
+document.getElementById('action-modal-close').addEventListener('click', closeActionModal);
+document.getElementById('action-modal-cancel').addEventListener('click', closeActionModal);
+document.getElementById('action-modal-overlay').addEventListener('click', closeActionModal);
+document.getElementById('action-modal-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+  if (!modalState.submitHandler) return closeActionModal();
+
+  const values = Object.fromEntries(new FormData(e.target).entries());
+  const shouldClose = modalState.submitHandler(values);
+  if (shouldClose !== false) closeActionModal();
+});
+
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+    e.preventDefault();
+    if (isCommandPaletteOpen()) closeCommandPalette();
+    else openCommandPalette();
+    return;
+  }
+
+  if (e.key === 'Escape') {
+    if (isCommandPaletteOpen()) {
+      closeCommandPalette();
+      return;
+    }
+    if (isActionModalOpen()) {
+      closeActionModal();
+      return;
+    }
+  }
+});
+
+// ── Intel tab ──
+function switchIntelTab(tab) {
+  currentIntelTab = tab === 'history' ? 'history' : 'month';
+  const on = 'cursor-pointer bg-secondary text-on-secondary px-3 py-1 text-sm font-bold border-2 border-inverse-surface hard-shadow-sm uppercase';
+  const off = 'cursor-pointer bg-surface-container border-2 border-inverse-surface px-3 py-1 text-sm font-bold uppercase hover:bg-surface-container-high transition-colors';
+  document.getElementById('intel-month').className = currentIntelTab === 'month' ? on : off;
+  document.getElementById('intel-history').className = currentIntelTab === 'history' ? on : off;
+  renderIntel(currentIntelTab);
+  showToast(currentIntelTab === 'history' ? 'Showing historical trends 📊' : 'Back to this month ✅');
+}
+
+// ── Init ──
+liquidityBalanceUsd = Number(appState.liquidityBalanceUsd) || liquidityBalanceUsd;
+renderCustomBucketsFromState();
+
+const forecastSlider = document.getElementById('intel-cut-slider');
+forecastSlider.value = String(clamp(Number(appState.lastForecastCutPct) || 20, 0, 100));
+
+trackMoneyTextNodes(document.body);
+setDarkMode(localStorage.getItem(STORAGE_KEYS.darkMode) === '1', { persist: false });
+setCurrency(localStorage.getItem(STORAGE_KEYS.currency) || 'USD', { persist: false });
+setFeedFilter('all');
+document.getElementById('feed-sort').value = feedSortMode;
+renderCommandPalette('');
+</script>
+</body>
+</html>
